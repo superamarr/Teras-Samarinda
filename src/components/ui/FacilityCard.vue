@@ -2,12 +2,12 @@
 defineProps({
   title: {
     type: String,
-    required: true
+    required: true,
   },
   image: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 })
 </script>
 
@@ -23,7 +23,7 @@ defineProps({
 .facility-card {
   position: relative;
   width: 100%;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 4 / 4;
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.3s ease;

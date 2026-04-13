@@ -18,7 +18,7 @@ defineProps({
 <template>
   <div
     :class="[
-      'activity-item border-bottom py-3',
+      'activity-item border-bottom py-2 py-md-3',
       isActive ? 'active-item' : 'inactive-item',
       isRevealed ? 'revealed' : 'not-revealed',
     ]"
@@ -35,10 +35,11 @@ defineProps({
 }
 
 .activity-text {
-  font-family: 'Instrument Serif', serif;
-  font-size: clamp(1.75rem, 2.5vw, 2.5rem);
+  font-family: var(--font-family-serif), 'Instrument Serif', serif;
+  font-size: var(--type-list-item);
   font-weight: 400;
   letter-spacing: -0.02em;
+  line-height: 1.15;
 }
 
 /* State Aktif (Hitam Tajam) */

@@ -28,7 +28,7 @@ defineProps({
     <div class="event-image-wrapper">
       <img :src="image" :alt="title" class="event-image" />
 
-      <div class="event-content">
+      <div class="event-content glass-card">
         <p class="event-date mb-2">{{ date }}</p>
         <h3 class="event-title mb-3">{{ title }}</h3>
         <p class="event-description mb-4">{{ description }}</p>
@@ -56,20 +56,13 @@ defineProps({
 <style scoped>
 .event-card {
   width: 100%;
-  border-radius: 16px;
-  overflow: hidden;
   position: relative;
-  transition: transform 0.3s ease;
-}
-
-.event-card:hover {
-  transform: translateY(-5px);
 }
 
 .event-image-wrapper {
   position: relative;
   width: 100%;
-  aspect-ratio: 1/1;
+  aspect-ratio: 4 / 4;
   border-radius: 16px;
   overflow: hidden;
 }
@@ -78,23 +71,31 @@ defineProps({
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Glassmorphism Content Panel */
+.event-card:hover .event-image {
+  transform: scale(1.05);
+}
+
+/* Content Panel - Forced Full Width */
 .event-content {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 2rem;
-
-  /* Glassmorphism Effect - Light Glass */
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border-top: 1px solid rgba(248, 248, 248, 0.04);
-
+  bottom: -1px;
+  left: -1px;
+  right: -1px;
+  width: calc(100% + 2px);
+  padding: 1rem 2rem;
   color: #ffffff;
+  z-index: 2;
+
+  /* Reinforced Glassmorphism */
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4.5px);
+  -webkit-backdrop-filter: blur(4.5x);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
 }
 
 .event-date {
@@ -151,13 +152,74 @@ defineProps({
 }
 
 /* Responsive Adjustments */
-@media (max-width: 768px) {
+@media (max-width: 992px) {
+  .event-image-wrapper {
+    border-radius: 20px;
+  }
+
   .event-content {
-    padding: 1.5rem;
+    padding: 1.25rem 1.75rem;
+    border-top-left-radius: 14px;
+    border-top-right-radius: 14px;
+  }
+}
+
+@media (max-width: 768px) {
+  .event-image-wrapper {
+    border-radius: 16px;
+  }
+
+  .event-content {
+    padding: 1rem 1.5rem;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
   }
 
   .event-title {
     font-size: 1.25rem;
+  }
+
+  .event-description {
+    font-size: 0.875rem;
+  }
+
+  .event-date {
+    font-size: 0.8rem;
+  }
+
+  .event-link {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .event-image-wrapper {
+    border-radius: 12px;
+  }
+
+  .event-content {
+    padding: 0.875rem 1.25rem;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+  }
+
+  .event-title {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .event-description {
+    font-size: 0.8rem;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .event-date {
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .event-link {
+    font-size: 0.75rem;
   }
 }
 </style>

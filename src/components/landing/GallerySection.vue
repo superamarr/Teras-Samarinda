@@ -1,357 +1,211 @@
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import ActionButton from '@/components/ui/ActionButton.vue'
-
-// Import images from assets
-import img1 from '@/assets/images/image (1).jpg'
-import img2 from '@/assets/images/image (2).jpg'
-import img3 from '@/assets/images/image (3).jpg'
-import img4 from '@/assets/images/image (4).jpg'
-import img5 from '@/assets/images/image (5).jpg'
+import GalleryEmblaCarousel from '@/components/landing/GalleryEmblaCarousel.vue'
+import { galleryService } from '@/api/gallery'
+import { resolveMediaUrl } from '@/utils/media'
 
 defineProps({
   id: String,
 })
 
-const galleryImages = [
-  { id: 1, src: img1, alt: 'Gallery Image 1' },
-  { id: 2, src: img2, alt: 'Gallery Image 2' },
-  { id: 3, src: img3, alt: 'Gallery Image 3' },
-  { id: 4, src: img4, alt: 'Gallery Image 4' },
-  { id: 5, src: img5, alt: 'Gallery Image 5' },
-]
-
-// Triplicate for infinite loop effect
-const extendedGallery = computed(() => [...galleryImages, ...galleryImages, ...galleryImages])
-
-// Carousel Logic
-const slider = ref(null)
-const isDragging = ref(false)
-const startX = ref(0)
-const scrollLeft = ref(0)
-const activeIndex = ref(0)
-const itemWidth = 550 + 16 // width + gap (1rem = 16px)
-
-// Momentum / Velocity tracking
-const velocity = ref(0)
-const lastX = ref(0)
-const lastTime = ref(0)
-let momentumAnimation = null
-
-const startDragging = (e) => {
-  isDragging.value = true
-  const pageX = e.pageX || e.touches[0].pageX
-  startX.value = pageX - slider.value.offsetLeft
-  scrollLeft.value = slider.value.scrollLeft
-  lastX.value = pageX
-  lastTime.value = Date.now()
-  velocity.value = 0
-
-  slider.value.style.cursor = 'grabbing'
-  slider.value.style.scrollBehavior = 'auto'
-
-  // Cancel any ongoing momentum animation
-  if (momentumAnimation) {
-    cancelAnimationFrame(momentumAnimation)
-  }
-}
-
-const stopDragging = (e) => {
-  if (!isDragging.value) return
-
-  isDragging.value = false
-
-  if (slider.value) {
-    slider.value.style.cursor = 'grab'
-
-    // Apply momentum
-    if (Math.abs(velocity.value) > 0.5) {
-      applyMomentum()
-    } else {
-      slider.value.style.scrollBehavior = 'smooth'
-      snapToNearest()
-    }
-  }
-}
-
-const move = (e) => {
-  if (!isDragging.value || !slider.value) return
-  e.preventDefault()
-
-  const pageX = e.pageX || e.touches[0].pageX
-  const x = pageX - slider.value.offsetLeft
-  const walk = (x - startX.value) * 1.5
-
-  // Calculate velocity
-  const now = Date.now()
-  const dt = now - lastTime.value
-  if (dt > 0) {
-    velocity.value = (pageX - lastX.value) / dt
-  }
-  lastX.value = pageX
-  lastTime.value = now
-
-  slider.value.scrollLeft = scrollLeft.value - walk
-}
-
-const applyMomentum = () => {
-  let currentVelocity = velocity.value
-  let lastScrollLeft = slider.value.scrollLeft
-  const friction = 0.95
-  const minVelocity = 0.01
-
-  const animate = () => {
-    if (Math.abs(currentVelocity) < minVelocity || isDragging.value) {
-      slider.value.style.scrollBehavior = 'smooth'
-      snapToNearest()
-      return
-    }
-
-    currentVelocity *= friction
-    slider.value.scrollLeft = lastScrollLeft - currentVelocity * 20
-    lastScrollLeft = slider.value.scrollLeft
-
-    handleInfiniteLoop()
-    momentumAnimation = requestAnimationFrame(animate)
-  }
-
-  animate()
-}
-
-const snapToNearest = () => {
-  if (!slider.value) return
-
-  const scrollPos = slider.value.scrollLeft
-  const nearestIndex = Math.round(scrollPos / itemWidth)
-  const snapPosition = nearestIndex * itemWidth
-
-  slider.value.scrollTo({
-    left: snapPosition,
-    behavior: 'smooth',
-  })
-}
-
-const handleInfiniteLoop = () => {
-  if (!slider.value) return
-
-  const scrollPos = slider.value.scrollLeft
-  const totalWidth = galleryImages.length * itemWidth
-
-  // Infinite loop: seamless boundary crossing
-  if (scrollPos >= totalWidth * 2) {
-    slider.value.scrollLeft = scrollPos - totalWidth
-  } else if (scrollPos < itemWidth) {
-    slider.value.scrollLeft = scrollPos + totalWidth
-  }
-}
-
-const handleScroll = () => {
-  if (!slider.value || isDragging.value) return
-
-  handleInfiniteLoop()
-
-  // Calculate active index (normalized to original array)
-  const rawIndex = Math.round(slider.value.scrollLeft / itemWidth)
-  activeIndex.value = Math.abs(rawIndex) % galleryImages.length
-}
-
-onMounted(() => {
-  if (slider.value) {
-    // Set initial scroll position to middle set
-    slider.value.scrollLeft = galleryImages.length * itemWidth
-    slider.value.addEventListener('scroll', handleScroll)
-  }
+const galleryImages = ref([])
+const sectionSettings = ref({
+  section_title: 'Gallery Teras Samarinda',
+  section_subtitle: 'Intip keceriaan pengunjung dan keindahan arsitektur Teras Samarinda',
+  cta_text: 'LIHAT SELENGKAPNYA',
+  cta_link: '/galeri',
+  layout_type: 'default',
+  section_title_italic: []
 })
+const isLoading = ref(true)
 
-onUnmounted(() => {
-  if (slider.value) {
-    slider.value.removeEventListener('scroll', handleScroll)
+const getWords = (text) => {
+  if (!text) return []
+  return text.split(/\s+/).filter((w) => w.length > 0)
+}
+
+const isItalic = (word) => {
+  const italicWords = sectionSettings.value.section_title_italic
+  if (!Array.isArray(italicWords)) return false
+  return italicWords.includes(word)
+}
+
+const fetchGallery = async () => {
+  try {
+    const [imagesRes, settingsRes] = await Promise.all([
+      galleryService.getAll(),
+      galleryService.getSettings(),
+    ])
+
+    if (imagesRes.data.success) {
+      galleryImages.value = (imagesRes.data.data || []).map((img) => ({
+        id: img.id,
+        src: resolveMediaUrl(img.url || img.image),
+        alt: img.title || 'Gallery Image',
+      }))
+    }
+
+    if (settingsRes?.data?.success && settingsRes.data.data) {
+      const d = settingsRes.data.data
+      const prev = sectionSettings.value
+      sectionSettings.value = {
+        ...prev,
+        ...d,
+        section_title: (d.section_title && String(d.section_title).trim())
+          ? d.section_title
+          : prev.section_title,
+        section_subtitle: (d.section_subtitle && String(d.section_subtitle).trim())
+          ? d.section_subtitle
+          : prev.section_subtitle,
+        cta_text: (d.cta_text != null && String(d.cta_text).trim())
+          ? d.cta_text
+          : prev.cta_text,
+        cta_link: (d.cta_link != null && String(d.cta_link).trim())
+          ? d.cta_link
+          : prev.cta_link,
+        layout_type: d.layout_type || prev.layout_type,
+        section_title_italic: Array.isArray(d.section_title_italic) ? d.section_title_italic : []
+      }
+    }
+  } catch (error) {
+    console.error('Failed to fetch gallery:', error)
+    galleryImages.value = []
+  } finally {
+    isLoading.value = false
   }
-  if (momentumAnimation) {
-    cancelAnimationFrame(momentumAnimation)
-  }
+}
+
+onMounted(async () => {
+  await fetchGallery()
 })
 </script>
 
 <template>
-  <section :id="id" class="gallery-section py-5">
-    <div class="container py-lg-5">
-      <!-- Header Section -->
-      <div class="row align-items-center mb-5">
-        <div class="col-lg-8">
-          <h2 class="gallery-title">Gallery Teras <span class="text-italic">Samarinda</span></h2>
-          <p class="gallery-subtitle">
-            Intip keceriaan pengunjung dan keindahan arsitektur Teras Samarinda
+  <section :id="id" class="gallery-section page-section-pad section-stack-over entrance-section">
+    <div class="container-fluid px-3 px-md-4 px-lg-5">
+      <header class="gallery-header">
+        <div class="gallery-header__text">
+          <h2 class="gallery-title mb-3 mb-md-4" v-entrance="{ x: -60, blur: 10 }">
+            <template v-for="(word, index) in getWords(sectionSettings.section_title)" :key="'title-' + index">
+              <span :class="{ 'text-italic': isItalic(word) }">{{ word }}</span
+              >{{ index < getWords(sectionSettings.section_title).length - 1 ? ' ' : '' }}
+            </template>
+          </h2>
+          <p class="gallery-subtitle mb-0" v-entrance="{ x: -40, blur: 10, delay: 200 }">
+            {{ sectionSettings.section_subtitle }}
           </p>
         </div>
-        <div class="col-lg-4 d-flex justify-content-lg-end mt-4 mt-lg-0">
-          <ActionButton text="LIHAT SELENGKAPNYA" variant="dark" gap="0px" href="/galeri" />
+        <div
+          v-if="sectionSettings.cta_text"
+          class="gallery-header__cta"
+          v-entrance="{ x: 28, blur: 10, delay: 280 }"
+        >
+          <ActionButton
+            :text="sectionSettings.cta_text"
+            variant="dark"
+            gap="0px"
+            :href="sectionSettings.cta_link"
+          />
         </div>
+      </header>
+
+      <div v-if="isLoading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
       </div>
 
-      <!-- Carousel / Gallery Images -->
-      <div
-        class="gallery-carousel-wrapper"
-        ref="slider"
-        @mousedown="startDragging"
-        @touchstart="startDragging"
-        @mouseleave="stopDragging"
-        @mouseup="stopDragging"
-        @touchend="stopDragging"
-        @mousemove="move"
-        @touchmove="move"
-      >
-        <div class="gallery-track">
-          <div
-            v-for="(image, index) in extendedGallery"
-            :key="'img-' + index"
-            class="gallery-item"
-            :class="{ active: activeIndex === index % galleryImages.length }"
-          >
-            <div class="image-inner">
-              <img
-                :src="image.src"
-                :alt="image.alt"
-                class="img-fluid w-100 h-100 object-fit-cover"
-              />
-              <div class="dim-overlay"></div>
-            </div>
-          </div>
-        </div>
+      <div v-else-if="galleryImages.length === 0" class="text-center py-5">
+        <p class="text-secondary">Belum ada foto di galeri.</p>
       </div>
+
+      <GalleryEmblaCarousel
+        v-else
+        :slides="galleryImages"
+      />
     </div>
   </section>
 </template>
 
 <style scoped>
 .gallery-section {
-  background-color: #f7f7f7;
+  background-color: #f4f7f8;
   position: relative;
-  z-index: 10;
-  overflow: hidden;
+}
+
+.gallery-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center; /* Set to center to vertically align button in middle of p and h */
+  justify-content: space-between;
+  column-gap: clamp(1.25rem, 4vw, 2.5rem);
+  row-gap: clamp(1rem, 2.5vw, 1.5rem);
+  margin-bottom: var(--section-pad-y);
+}
+
+@media (min-width: 992px) {
+  .gallery-header {
+    margin-bottom: var(--section-pad-y-lg);
+  }
+}
+
+.gallery-header__text {
+  flex: 1 1 0;
+  min-width: min(100%, 20rem);
+  max-width: min(100%, var(--prose-max-width));
+}
+
+@media (min-width: 992px) {
+  .gallery-header__text {
+    max-width: min(100%, 36rem);
+  }
+}
+
+.gallery-header__cta {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  min-height: 3rem;
+}
+
+@media (min-width: 992px) {
+  .gallery-header__cta {
+    justify-content: flex-end;
+  }
 }
 
 .gallery-title {
-  font-family: 'Instrument Serif', serif;
-  font-size: clamp(3rem, 5vw, 4.2rem);
+  font-family: var(--font-family-serif), 'Instrument Serif', serif;
+  font-size: var(--type-heading-lg);
   font-weight: 400;
   line-height: 1.1;
-  color: #1a1a1a;
+  letter-spacing: -0.02em;
+  color: #000000;
 }
 
-.gallery-title .text-italic {
+.text-normal {
+  font-style: normal;
+}
+
+.text-italic {
   font-style: italic;
 }
 
 .gallery-subtitle {
-  font-family: 'Inter', sans-serif;
-  font-size: 1.15rem;
-  color: #666;
-  max-width: 500px;
+  font-family: var(--font-family-sans), 'Inter', sans-serif;
+  font-size: var(--type-body-relaxed);
+  font-weight: 500;
+  line-height: 1.55;
+  color: #4a5560;
+  max-width: var(--prose-max-width);
 }
 
-/* Carousel Container */
-.gallery-carousel-wrapper {
-  cursor: grab;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  /* Scroll Snap for center snap behavior */
-  scroll-snap-type: x proximity;
-  /* Smoother scrolling */
-  -webkit-overflow-scrolling: touch;
-  /* Padding untuk efek sepotong di kiri-kanan */
-  padding: 20px calc((100% - 550px) / 2);
-}
-
-.gallery-carousel-wrapper::-webkit-scrollbar {
-  display: none;
-}
-
-.gallery-track {
-  display: flex;
-  gap: 0.1rem;
-}
-
-.gallery-item {
-  flex: 0 0 auto;
-  width: 550px;
-  max-width: 85vw;
-  /* Scroll Snap Align Center */
-  scroll-snap-align: center;
-  transition: all 0.5s ease;
-  transform: scale(0.85);
-  opacity: 0.6;
-}
-
-.gallery-item.active {
-  transform: scale(1);
-  opacity: 1;
-}
-
-.image-inner {
-  position: relative;
-  aspect-ratio: 16/10;
-  overflow: hidden;
-  border-radius: 4px;
-}
-
-.image-inner img {
-  user-select: none;
-  -webkit-user-drag: none;
-  transition: transform 0.3s ease;
-}
-
-.gallery-item.active .image-inner:hover img {
-  transform: scale(1.02);
-}
-
-/* Dim Overlay untuk item non-aktif */
-.dim-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(150, 150, 150, 0.3);
-  pointer-events: none;
-  transition: opacity 0.5s ease;
-}
-
-.gallery-item.active .dim-overlay {
-  opacity: 0;
-}
-
-@media (max-width: 992px) {
-  .gallery-carousel-wrapper {
-    padding: 20px calc((100% - 450px) / 2);
-  }
-
-  .gallery-item {
-    width: 450px;
-  }
-}
-
-@media (max-width: 768px) {
-  .gallery-carousel-wrapper {
-    padding: 20px calc((100% - 320px) / 2);
-  }
-
-  .gallery-item {
-    width: 320px;
-    max-width: 80vw;
-  }
-}
-
-@media (max-width: 480px) {
-  .gallery-carousel-wrapper {
-    padding: 20px calc((100% - 280px) / 2);
-  }
-
-  .gallery-item {
-    width: 280px;
-    max-width: 75vw;
+@media (max-width: 575.98px) {
+  .gallery-title__script {
+    display: block;
+    margin-left: 0;
+    margin-top: 0.15rem;
+    line-height: 1;
   }
 }
 </style>

@@ -1,79 +1,113 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import FacilityCard from '@/components/ui/FacilityCard.vue'
+import { facilityService } from '@/api/facilities'
+import { resolveMediaUrl } from '@/utils/media'
 
-// Import images from assets
-import imgEventBudaya from '@/assets/images/generation_8491.jfif'
-import imgToilet from '@/assets/images/generation_8501.jfif'
-import imgPejalanKaki from '@/assets/images/generation_8510.jfif'
-import imgPedestrian from '@/assets/images/generation_8515.jfif'
-import imgPenerangan from '@/assets/images/image 5.jpg'
+defineProps({
+  id: String,
+})
 
-// Facilities data
-const facilities = [
-  {
-    id: 1,
-    title: 'Event Budaya',
-    image: imgEventBudaya,
-  },
-  {
-    id: 2,
-    title: 'Toilet Umum',
-    image: imgToilet,
-  },
-  {
-    id: 3,
-    title: 'Area Pejalan Kaki',
-    image: imgPejalanKaki,
-  },
-  {
-    id: 4,
-    title: 'Jalur Pedestrian',
-    image: imgPedestrian,
-  },
-  {
-    id: 5,
-    title: 'Penerangan',
-    image: imgPenerangan,
-  },
-]
+const facilities = ref([])
+const sectionSettings = ref({
+  section_title: 'Fasilitas Teras Samarinda',
+  section_subtitle: 'Nikmati berbagai fasilitas modern yang dirancang untuk memberikan pengalaman terbaik.',
+  layout_type: 'default',
+  section_title_italic: []
+})
+const isLoading = ref(true)
+const hoverPaused = ref(false)
 
-// Hover state untuk pause animation
-const isPaused = ref(false)
+const fetchFacilities = async () => {
+  try {
+    const [facilitiesRes, settingsRes] = await Promise.all([
+      facilityService.getAll(),
+      facilityService.getSettings()
+    ])
+
+    if (facilitiesRes.data.success) {
+      facilities.value = facilitiesRes.data.data || []
+    }
+
+    if (settingsRes.data.success && settingsRes.data.data) {
+      sectionSettings.value = { ...sectionSettings.value, ...settingsRes.data.data }
+    }
+  } catch (error) {
+    console.error('Failed to fetch facilities:', error)
+    facilities.value = []
+  } finally {
+    isLoading.value = false
+  }
+}
+
+const getImageUrl = (path) => {
+  if (!path) return ''
+  return resolveMediaUrl(path)
+}
+
+const getWords = (text) => {
+  if (!text) return []
+  return text.split(/\s+/).filter((w) => w.length > 0)
+}
+
+const isItalic = (word) => {
+  const italicWords = sectionSettings.value.section_title_italic
+  if (!Array.isArray(italicWords)) return false
+  return italicWords.includes(word)
+}
+
+onMounted(async () => {
+  await fetchFacilities()
+})
 </script>
 
 <template>
-  <section class="facilities-section">
-    <div class="container">
+  <section :id="id" class="facilities-section page-section-pad section-stack-over entrance-section">
+    <div class="container-fluid px-3 px-md-4 px-lg-5">
       <div class="facilities-header">
-        <h2 class="facilities-title">Fasilitas Teras <span class="italic">Samarinda</span></h2>
-        <p class="facilities-description">
-          Nikmati berbagai fasilitas modern yang dirancang untuk memberikan<br />
-          pengalaman terbaik selama berada di Teras Samarinda.
+        <h2 class="facilities-title" v-entrance="{ x: 60, blur: 10 }">
+          <template v-for="(word, index) in getWords(sectionSettings.section_title)" :key="'title-' + index">
+            <span :class="{ 'text-italic': isItalic(word) }">{{ word }}</span
+            >{{ index < getWords(sectionSettings.section_title).length - 1 ? ' ' : '' }}
+          </template>
+        </h2>
+        <p class="facilities-description" v-entrance="{ x: 40, blur: 10, delay: 200 }">
+          {{ sectionSettings.section_subtitle }}
         </p>
+      </div>
+
+      <!-- Loading State -->
+      <div v-if="isLoading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+      </div>
+
+      <!-- Empty State -->
+      <div v-else-if="facilities.length === 0" class="text-center py-5">
+        <p class="text-secondary">Belum ada fasilitas.</p>
       </div>
 
       <!-- Carousel Container -->
       <div
+        v-else
         class="carousel-wrapper"
-        :class="{ paused: isPaused }"
-        @mouseenter="isPaused = true"
-        @mouseleave="isPaused = false"
+        :class="{ paused: hoverPaused }"
+        @mouseenter="hoverPaused = true"
+        @mouseleave="hoverPaused = false"
       >
         <div class="carousel-track">
           <!-- Original Items -->
           <FacilityCard
             v-for="facility in facilities"
             :key="'original-' + facility.id"
-            :title="facility.title"
-            :image="facility.image"
+            :title="facility.name"
+            :image="getImageUrl(facility.image)"
           />
           <!-- Duplicate Items untuk Seamless Loop -->
           <FacilityCard
             v-for="facility in facilities"
             :key="'duplicate-' + facility.id"
-            :title="facility.title"
-            :image="facility.image"
+            :title="facility.name"
+            :image="getImageUrl(facility.image)"
           />
         </div>
       </div>
@@ -83,11 +117,7 @@ const isPaused = ref(false)
 
 <style scoped>
 .facilities-section {
-  padding: 6rem 0;
   background-color: #f7f7f7;
-  position: relative;
-  z-index: 10;
-  overflow: hidden;
 }
 
 .container {
@@ -102,28 +132,29 @@ const isPaused = ref(false)
   flex-direction: column;
   align-items: flex-end;
   text-align: right;
-  margin-bottom: 4rem;
+  margin-bottom: var(--section-header-gap);
 }
 
 .facilities-title {
-  font-family: 'Instrument Serif', serif;
-  font-size: 4rem;
+  font-family: var(--font-family-serif), 'Instrument Serif', serif;
+  font-size: var(--type-heading-lg);
   font-weight: 400;
   color: #111;
   line-height: 1.1;
-  margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.75rem;
 }
 
-.facilities-title .italic {
+.facilities-title .text-italic {
   font-style: italic;
 }
 
 .facilities-description {
-  font-family: 'Inter', sans-serif;
-  font-size: 1.125rem;
-  line-height: 1.6;
+  font-family: var(--font-family-sans), 'Inter', sans-serif;
+  font-size: var(--type-body-relaxed);
+  line-height: 1.55;
   color: #333;
-  max-width: 600px;
+  max-width: var(--prose-max-width);
 }
 
 /* Carousel Styles */
@@ -158,10 +189,6 @@ const isPaused = ref(false)
 }
 
 @media (max-width: 768px) {
-  .facilities-title {
-    font-size: 3rem;
-  }
-
   .facilities-header {
     align-items: flex-start;
     text-align: left;

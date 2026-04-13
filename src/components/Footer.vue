@@ -1,5 +1,32 @@
 <script setup>
-// Reusable Footer Component
+import { ref, onMounted } from 'vue'
+import { contactService } from '@/api/contact'
+
+const contactData = ref({
+  email: 'info@terassamarinda.id',
+  phone: '+62 811-5504-747',
+  address: 'Jl. Gajah Mada, Samarinda',
+  facebook: '#',
+  instagram: '#'
+})
+
+const loadContact = async () => {
+  try {
+    const res = await contactService.get()
+    if (res.data?.success && res.data?.data) {
+      const data = res.data.data
+      contactData.value.email = data.email || 'info@terassamarinda.id'
+      contactData.value.phone = data.phone || '+62 811-5504-747'
+      contactData.value.address = data.address || 'Jl. Gajah Mada, Samarinda'
+      contactData.value.facebook = data.facebook || '#'
+      contactData.value.instagram = data.instagram || '#'
+    }
+  } catch (error) {
+    console.error('Failed to load contact info', error)
+  }
+}
+
+onMounted(loadContact)
 </script>
 
 <template>
@@ -19,7 +46,7 @@
           <div class="social-links-wrapper">
             <h6 class="social-label mb-3">IKUTI KAMI</h6>
             <div class="social-icons d-flex gap-3">
-              <a href="#" class="social-icon">
+              <a :href="contactData.instagram" class="social-icon" target="_blank">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -36,7 +63,7 @@
                   <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
                 </svg>
               </a>
-              <a href="#" class="social-icon">
+              <a :href="contactData.facebook" class="social-icon" target="_blank">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -103,7 +130,7 @@
                 ></path>
                 <polyline points="22,6 12,13 2,6"></polyline>
               </svg>
-              <span>info@terassamarinda.id</span>
+              <span>{{ contactData.email }}</span>
             </li>
             <li class="d-flex align-items-center gap-3 mb-3">
               <svg
@@ -121,7 +148,7 @@
                   d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"
                 ></path>
               </svg>
-              <span>+62 811-5504-747</span>
+              <span>{{ contactData.phone }}</span>
             </li>
             <li class="d-flex align-items-center gap-3">
               <svg
@@ -138,7 +165,7 @@
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                 <circle cx="12" cy="10" r="3"></circle>
               </svg>
-              <span>Jl. Gajah Mada, Samarinda</span>
+              <span>{{ contactData.address }}</span>
             </li>
           </ul>
         </div>
@@ -155,30 +182,35 @@
 
 <style scoped>
 .footer-section {
-  background-color: #1b1b1b;
+  display: block;
+  background-color: #1b1b1b !important;
   color: #ffffff;
-  padding: 80px 0 40px;
-  position: relative;
-  z-index: 10;
+  padding: var(--section-pad-y) 0 var(--spacing-lg);
+}
+
+@media (min-width: 992px) {
+  .footer-section {
+    padding-top: var(--section-pad-y-lg);
+  }
 }
 
 .brand-title {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 700;
   font-size: 1.5rem;
   letter-spacing: -0.5px;
 }
 
 .brand-description {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.95rem;
-  line-height: 1.6;
+  font-family: var(--font-family-sans);
+  font-size: var(--type-body);
+  line-height: 1.55;
   color: rgba(255, 255, 255, 0.7);
-  max-width: 90%;
+  max-width: var(--prose-max-width);
 }
 
 .social-label {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 700;
   font-size: 0.8rem;
   letter-spacing: 1px;
@@ -194,7 +226,7 @@
 }
 
 .footer-heading {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-family-sans);
   font-weight: 700;
   font-size: 0.85rem;
   letter-spacing: 1px;
@@ -202,26 +234,26 @@
 }
 
 .footer-links li {
-  margin-bottom: 12px;
+  margin-bottom: var(--spacing-sm);
 }
 
 .footer-links a {
   color: rgba(255, 255, 255, 0.7);
   text-decoration: none;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.95rem;
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-sm);
   transition: all 0.3s ease;
 }
 
 .footer-links a:hover {
   color: #ffffff;
-  padding-left: 5px;
+  padding-left: var(--spacing-xs);
 }
 
 .contact-info li {
   color: rgba(255, 255, 255, 0.7);
-  font-family: 'Inter', sans-serif;
-  font-size: 0.95rem;
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-sm);
 }
 
 .footer-divider {
@@ -229,27 +261,27 @@
 }
 
 .copyright-text {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-family-sans);
   font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.5);
 }
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
   .footer-section {
-    padding: 60px 0 30px;
+    padding: var(--spacing-lg) 0 var(--spacing-md);
   }
 }
 
-/* Konsisten margin antar kolom */
+/* Consistent column margins */
 .footer-container .row > [class*='col-'] {
-  padding-left: 1.5rem !important;
-  padding-right: 1.5rem !important;
+  padding-left: var(--spacing-md) !important;
+  padding-right: var(--spacing-md) !important;
 }
 
 @media (min-width: 992px) {
   .footer-container .row > [class*='col-'] {
-    padding-left: 2.5rem !important;
-    padding-right: 2.5rem !important;
+    padding-left: var(--spacing-lg) !important;
+    padding-right: var(--spacing-lg) !important;
   }
 }
 </style>

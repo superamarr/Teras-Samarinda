@@ -1,68 +1,95 @@
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import ActivityListItem from '@/components/ui/ActivityListItem.vue'
-
-// Import images
-import img1 from '@/assets/images/image (1).jpg'
-import img2 from '@/assets/images/image (2).jpg'
-import img3 from '@/assets/images/image (3).jpg'
-import img4 from '@/assets/images/image (4).jpg'
-import img5 from '@/assets/images/image (5).jpg'
+import { activityService } from '@/api/activities'
+import { resolveMediaUrl } from '@/utils/media'
 
 defineProps({
   id: String,
 })
 
-// Data list aktivitas dengan gambar
-const activities = [
-  { text: 'Menikmati Sunset & View Sungai', image: img1 },
-  { text: 'Hunting Foto Estetik', image: img2 },
-  { text: 'Kuliner Malam', image: img3 },
-  { text: 'Jalan-jalan Santai', image: img4 },
-  { text: 'Menikmati Event', image: img5 },
-]
+const activities = ref([])
+const sectionSettings = ref({
+  section_title: 'Aktivitas Yang Bisa Anda Lakukan',
+  section_subtitle: 'Beragam kegiatan menarik sering diadakan di Teras Samarinda.',
+  layout_type: 'default',
+  section_title_italic: [],
+})
+const isLoading = ref(true)
 
-// State untuk menyimpan index list yang sedang aktif
 const activeIndex = ref(0)
-
-// State untuk reveal setiap item
 const revealedItems = ref([])
-
-// Computed untuk gambar aktif
-const currentImage = computed(() => activities[activeIndex.value]?.image || img1)
-
-// Ref untuk setiap item di list
 const itemRefs = ref([])
 const sectionRef = ref(null)
+const listContainerRef = ref(null)
 
-// Intersection Observer
+const fetchActivities = async () => {
+  try {
+    const [activitiesRes, settingsRes] = await Promise.all([
+      activityService.getAll(),
+      activityService.getSettings(),
+    ])
+
+    if (activitiesRes.data.success) {
+      activities.value = activitiesRes.data.data || []
+    }
+
+    if (settingsRes.data.success && settingsRes.data.data) {
+      sectionSettings.value = { ...sectionSettings.value, ...settingsRes.data.data }
+    }
+  } catch (error) {
+    console.error('Failed to fetch activities:', error)
+    activities.value = []
+  } finally {
+    isLoading.value = false
+  }
+}
+
+const activityList = computed(() => {
+  return activities.value.map((a) => ({
+    text: a.name,
+    image: a.image ? resolveMediaUrl(a.image) : '/images/placeholder.jpg',
+  }))
+})
+
+const getWords = (text) => {
+  if (!text) return []
+  return text.split(/\s+/).filter((w) => w.length > 0)
+}
+
+const isItalic = (word) => {
+  const italicWords = sectionSettings.value.section_title_italic
+  if (!Array.isArray(italicWords)) return false
+  return italicWords.includes(word)
+}
+
+const currentImage = computed(
+  () => activityList.value[activeIndex.value]?.image || '/images/placeholder.jpg',
+)
+
 let observer = null
 
-onMounted(() => {
-  // Inisialisasi revealedItems dengan false
-  revealedItems.value = activities.map(() => false)
+onMounted(async () => {
+  await fetchActivities()
+  revealedItems.value = activityList.value.map(() => false)
 
   observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         const index = Number(entry.target.dataset.index)
         if (entry.isIntersecting && index >= 0) {
-          // Reveal item dengan delay
-          setTimeout(() => {
-            revealedItems.value[index] = true
-            // Set active saat item reveal
-            activeIndex.value = index
-          }, index * 150)
+          revealedItems.value[index] = true
+          activeIndex.value = index
         }
       })
     },
     {
-      threshold: 0.2,
-      rootMargin: '0px 0px -50px 0px',
+      root: listContainerRef.value || null,
+      threshold: 0.6,
+      rootMargin: '-10% 0px -20% 0px',
     },
   )
 
-  // Observe setiap item
   itemRefs.value.forEach((el) => {
     if (el) observer.observe(el)
   })
@@ -76,44 +103,81 @@ onUnmounted(() => {
   }
 })
 
-// Set ref untuk item
 const setItemRef = (el, index) => {
   if (el) {
     el.dataset.index = index
     itemRefs.value[index] = el
   }
 }
+
+const handleSectionWheel = (e) => {
+  if (!listContainerRef.value) return
+
+  // Hanya hijack di tablet/desktop dimana list ada di samping gambar
+  if (window.innerWidth < 992) return
+
+  const list = listContainerRef.value
+  const isAtTop = list.scrollTop <= 0
+  const isAtBottom = Math.ceil(list.scrollTop + list.clientHeight) >= list.scrollHeight
+
+  // Arah scroll (positif = ke bawah, negatif = ke atas)
+  if (e.deltaY > 0 && !isAtBottom) {
+    e.preventDefault()
+    list.scrollTop += e.deltaY
+  } else if (e.deltaY < 0 && !isAtTop) {
+    e.preventDefault()
+    list.scrollTop += e.deltaY
+  }
+}
 </script>
 
 <template>
-  <section :id="id" ref="sectionRef" class="activities-section py-5">
-    <div class="container py-lg-5">
+  <section
+    :id="id"
+    ref="sectionRef"
+    class="activities-section page-section-pad section-stack-over entrance-section"
+    @wheel="handleSectionWheel"
+  >
+    <div class="container-fluid px-3 px-md-4 px-lg-5">
       <!-- Header Teks Bagian Atas -->
-      <div class="row mb-5">
-        <div class="col-lg-6">
-          <h2 class="section-title mb-4">
-            <span class="text-italic">Aktivitas </span>
-            <span class="text-normal">Yang Bisa Anda Lakukan</span>
+      <div class="row mb-4 mb-lg-5">
+        <div class="col-12 col-lg-7 col-xl-6">
+          <h2 class="section-title mb-3 mb-md-4" v-entrance="{ x: -60, blur: 10 }">
+            <template
+              v-for="(word, index) in getWords(sectionSettings.section_title)"
+              :key="'title-' + index"
+            >
+              <span :class="{ 'text-italic': isItalic(word) }">{{ word }}</span
+              >{{ index < getWords(sectionSettings.section_title).length - 1 ? ' ' : '' }}
+            </template>
           </h2>
-          <p class="section-subtitle">
-            Beragam kegiatan menarik sering diadakan di Teras Samarinda, mulai dari event komunitas
-            hingga hiburan publik.
+          <p class="section-subtitle mb-0" v-entrance="{ x: -40, blur: 10, delay: 200 }">
+            {{ sectionSettings.section_subtitle }}
           </p>
         </div>
       </div>
 
+      <!-- Loading State -->
+      <div v-if="isLoading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+      </div>
+
+      <!-- Empty State -->
+      <div v-else-if="activityList.length === 0" class="text-center py-5">
+        <p class="text-secondary">Belum ada aktivitas.</p>
+      </div>
+
       <!-- Konten Gambar Kiri & List Kanan -->
-      <div class="row align-items-center gx-lg-5">
+      <div v-else class="row gx-lg-5 gy-4 align-items-stretch">
         <!-- Kolom Kiri: Gambar -->
-        <div class="col-lg-6 mb-4 mb-lg-0">
-          <div class="img-wrapper h-100">
+        <div class="col-lg-6">
+          <div class="img-wrapper h-100 position-relative">
             <Transition name="fade" mode="out-in">
               <img
                 :key="activeIndex"
                 :src="currentImage"
-                :alt="activities[activeIndex]?.text"
-                class="img-fluid w-100 object-fit-cover shadow-sm"
-                style="min-height: 400px; max-height: 400px"
+                :alt="activityList[activeIndex]?.text"
+                class="activities-preview-img img-fluid w-100 object-fit-cover shadow-sm h-100"
               />
             </Transition>
           </div>
@@ -121,18 +185,26 @@ const setItemRef = (el, index) => {
 
         <!-- Kolom Kanan: List Berulang (Modular) -->
         <div class="col-lg-6">
-          <div class="activity-list-container d-flex flex-column">
-            <div
-              v-for="(activity, index) in activities"
-              :key="index"
-              :ref="(el) => setItemRef(el, index)"
-            >
-              <ActivityListItem
-                :text="activity.text"
-                :is-active="activeIndex === index"
-                :is-revealed="revealedItems[index]"
-                @click="activeIndex = index"
-              />
+          <div class="activity-scroll-wrapper" ref="listContainerRef">
+            <div class="activity-list-container d-flex flex-column py-2">
+              <div
+                v-for="(activity, index) in activityList"
+                :key="index"
+                :ref="(el) => setItemRef(el, index)"
+              >
+                <ActivityListItem
+                  :text="activity.text"
+                  :is-active="activeIndex === index"
+                  :is-revealed="revealedItems[index]"
+                  @click="activeIndex = index"
+                />
+              </div>
+
+              <!-- Teks Tambahan Paling Bawah (Ikut ke Scroll) -->
+              <p class="mt-4 pt-4 mb-5 caption-text text-secondary">
+                Dari sudut-sudut estetik yang tenang hingga energi pameran UMKM dan festival musik,
+                Teras Samarinda menyajikan sisi terbaik Samarinda dalam satu ruang terpadu.
+              </p>
             </div>
           </div>
         </div>
@@ -145,18 +217,15 @@ const setItemRef = (el, index) => {
 .activities-section {
   background-color: #f7f7f7;
   color: #1a1a1a;
-  position: relative;
-  z-index: 10;
 }
 
 .section-title {
-  font-family: 'Instrument Serif', serif;
-  font-size: clamp(2.5rem, 4vw, 3.5rem);
+  font-family: var(--font-family-serif), 'Instrument Serif', serif;
+  font-size: var(--type-heading-lg);
   font-weight: 400;
   line-height: 1.1;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   color: #000000;
-  white-space: nowrap;
 }
 
 .section-title .text-italic {
@@ -168,12 +237,12 @@ const setItemRef = (el, index) => {
 }
 
 .section-subtitle {
-  font-family: 'Inter', sans-serif;
-  font-size: 1rem;
+  font-family: var(--font-family-sans), 'Inter', sans-serif;
+  font-size: var(--type-body-relaxed);
   font-weight: 500;
-  line-height: 1.6;
+  line-height: 1.55;
   color: #333333;
-  max-width: 90%;
+  max-width: var(--prose-max-width);
 }
 
 .img-wrapper {
@@ -184,6 +253,23 @@ const setItemRef = (el, index) => {
 
 .img-wrapper img {
   border-radius: 4px;
+}
+
+/* Tinggi gambar mengikuti layar, tidak memaksa 400px di ponsel */
+.activities-preview-img {
+  display: block;
+  aspect-ratio: 4 / 3;
+  min-height: 200px;
+  max-height: min(420px, 48vh);
+  object-fit: cover;
+}
+
+@media (min-width: 992px) {
+  .activities-preview-img {
+    aspect-ratio: 16 / 11;
+    min-height: 320px;
+    max-height: min(440px, 55vh);
+  }
 }
 
 /* Transition untuk gambar */
@@ -202,5 +288,33 @@ const setItemRef = (el, index) => {
 .fade-leave-to {
   opacity: 0;
   transform: scale(0.95);
+}
+
+.activity-scroll-wrapper {
+  overflow-y: auto;
+  scrollbar-width: none;
+  mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+  padding-right: 1.5rem;
+  /* Matching image heights */
+  min-height: 200px;
+  max-height: min(420px, 48vh);
+}
+
+.activity-scroll-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 992px) {
+  .activity-scroll-wrapper {
+    min-height: 320px;
+    max-height: min(440px, 55vh);
+  }
+}
+
+.caption-text {
+  font-family: var(--font-family-sans), 'Inter', sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
 }
 </style>

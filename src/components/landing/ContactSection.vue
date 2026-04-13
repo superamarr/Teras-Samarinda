@@ -1,10 +1,50 @@
 <script setup>
+import { ref, onMounted } from 'vue'
 import ContactInfoItem from '@/components/ui/ContactInfoItem.vue'
 import ActionButton from '@/components/ui/ActionButton.vue'
+import { contactService } from '@/api/contact'
 
 defineProps({
   id: String,
 })
+
+const contactData = ref({
+  title: 'Kunjungi Kami',
+  description:
+    'Berlokasi strategis di pusat kota Samarinda, Teras Samarinda sangat mudah diakses dengan kendaraan pribadi maupun transportasi umum.',
+  address: 'Jl. Gajah Mada, Bugis, Kec. Samarinda Kota, kota Samarinda, Kalimantan Timur 75121',
+  operating_hours: 'Senin - Minggu: Terbuka 24 Jam',
+  map_embed: '',
+  cta_text: 'BOOKING EVENT',
+  cta_link: 'https://maps.app.goo.gl/96e5ea78007505d1',
+  title_italic: [],
+})
+
+const isLoading = ref(true)
+
+const fetchContactData = async () => {
+  try {
+    const response = await contactService.get()
+    if (response.data.success && response.data.data) {
+      const data = response.data.data
+      contactData.value = {
+        ...contactData.value,
+        title: data.title || contactData.value.title,
+        description: data.description || contactData.value.description,
+        address: data.address || contactData.value.address,
+        operating_hours: data.operatingHours || contactData.value.operating_hours,
+        map_embed: data.mapEmbed || contactData.value.map_embed,
+        cta_text: data.cta_text || contactData.value.cta_text,
+        cta_link: data.cta_link || contactData.value.cta_link,
+        title_italic: Array.isArray(data.title_italic) ? data.title_italic : []
+      }
+    }
+  } catch (error) {
+    console.error('Failed to fetch contact data:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
 
 const locationIcon = `
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -19,56 +59,77 @@ const clockIcon = `
     <polyline points="12 6 12 12 16 14"></polyline>
   </svg>
 `
+
+const getWords = (text) => {
+  if (!text) return []
+  return text.split(/\s+/).filter((w) => w.length > 0)
+}
+
+const isItalic = (word) => {
+  const italicWords = contactData.value.title_italic
+  if (!Array.isArray(italicWords)) return false
+  return italicWords.includes(word)
+}
+
+onMounted(async () => {
+  await fetchContactData()
+})
 </script>
 
 <template>
-  <section :id="id" class="contact-section py-5">
-    <div class="container py-lg-5">
+  <section :id="id" class="contact-section page-section-pad section-stack-over entrance-section">
+    <div class="container-fluid px-3 px-md-4 px-lg-5">
       <div class="row align-items-center gy-5">
         <!-- Content Column -->
         <div class="col-lg-6">
           <div class="pe-lg-5">
-            <h2 class="contact-title mb-4"><span class="text-italic">Kunjungi Kami</span></h2>
-            <p class="contact-description mb-5">
-              Berlokasi strategis di pusat kota Samarinda, Teras Samarinda sangat mudah diakses
-              dengan kendaraan pribadi maupun transportasi umum.
+            <h2 class="contact-title mb-3 mb-md-4" v-entrance="{ x: -60, blur: 10 }">
+              <template v-for="(word, index) in getWords(contactData.title)" :key="'title-' + index">
+                <span :class="{ 'text-italic': isItalic(word) }">{{ word }}</span
+                >{{ index < getWords(contactData.title).length - 1 ? ' ' : '' }}
+              </template>
+            </h2>
+            <p class="contact-description mb-4" v-entrance="{ x: -40, blur: 10, delay: 200 }">
+              {{ contactData.description }}
             </p>
 
-            <div class="contact-info-list mb-5">
-              <ContactInfoItem
-                :icon="locationIcon"
-                label="Alamat"
-                value="Jl. Gajah Mada, Bugis, Kec. Samarinda Kota, Kota Samarinda, Kalimantan Timur 75121"
-              />
+            <div class="contact-info-list mb-4" v-entrance="{ x: -40, blur: 10, delay: 400 }">
+              <ContactInfoItem :icon="locationIcon" label="Alamat" :value="contactData.address" />
               <ContactInfoItem
                 :icon="clockIcon"
                 label="Jam Operasional"
-                value="Senin - Minggu: Terbuka 24 Jam"
+                :value="contactData.operating_hours"
               />
             </div>
 
-            <!-- Action Button with 0px gap as requested -->
-            <ActionButton
-              text="BUKA DI GOOGLE MAPS"
-              variant="dark"
-              gap="0px"
-              href="https://maps.app.goo.gl/96e5ea78007505d1"
-            />
+            <div v-entrance="{ x: -30, blur: 10, delay: 600 }">
+              <ActionButton
+                :text="contactData.cta_text"
+                variant="dark"
+                gap="0px"
+                :href="contactData.cta_link"
+              />
+            </div>
           </div>
         </div>
 
         <!-- Map Column -->
         <div class="col-lg-6">
-          <div class="map-container shadow-lg rounded-4 overflow-hidden border">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.665337187675!2d117.13924390000001!3d-0.5017463999999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2df67f001e7cbe89%3A0x96e5ea78007505d1!2sTeras%20Samarinda!5e0!3m2!1sid!2sid!4v1775472497616!5m2!1sid!2sid"
-              width="100%"
-              height="450"
-              style="border: 0"
-              allowfullscreen=""
-              loading="lazy"
-              referrerpolicy="no-referrer-when-downgrade"
-            ></iframe>
+          <div
+            class="map-container shadow-lg rounded-4 overflow-hidden border"
+            v-entrance="{ x: 60, blur: 10, delay: 300 }"
+          >
+            <div
+              v-if="contactData.map_embed"
+              v-html="contactData.map_embed"
+              class="map-embed-wrapper h-100"
+            ></div>
+            <div v-else class="h-100 d-flex align-items-center justify-content-center bg-light">
+              <div class="text-center text-secondary opacity-50">
+                <i class="bi bi-map fs-1"></i>
+                <p class="small">Peta belum tersedia</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -78,43 +139,59 @@ const clockIcon = `
 
 <style scoped>
 .contact-section {
-  background-color: #f7f7f7;
-  position: relative;
-  z-index: 10;
+  background-color: var(--color-bg-light);
 }
 
 .contact-title {
-  font-family: 'Instrument Serif', serif;
-  font-size: clamp(3.5rem, 6vw, 4.5rem);
+  font-family: var(--font-family-serif), 'Instrument Serif', serif;
+  font-size: var(--type-heading-lg);
   font-weight: 400;
   line-height: 1.1;
-  color: #1a1a1a;
+  letter-spacing: -0.02em;
+  color: var(--color-primary);
 }
 
-.contact-title .text-italic {
+.text-serif {
+  font-family: var(--font-family-serif);
+}
+
+.text-italic {
   font-style: italic;
 }
 
 .contact-description {
-  font-family: 'Inter', sans-serif;
-  font-size: 1.125rem;
-  line-height: 1.6;
-  color: #555;
-  max-width: 500px;
+  font-family: var(--font-family-sans), 'Inter', sans-serif;
+  font-size: var(--type-body-relaxed);
+  font-weight: 500;
+  line-height: 1.55;
+  color: var(--color-secondary);
+  max-width: var(--prose-max-width);
 }
 
 .map-container {
   min-height: 450px;
   background-color: #fafafa;
+  position: relative;
 }
 
-.map-container iframe {
+.map-embed-wrapper :deep(iframe) {
+  width: 100% !important;
+  height: 450px !important;
+  border: 0;
   display: block;
 }
 
 @media (max-width: 991.98px) {
-  .contact-title {
-    font-size: 3rem;
+}
+
+@media (max-width: 767.98px) {
+  .map-container {
+    min-height: auto;
+    aspect-ratio: 4 / 3;
+  }
+
+  .map-embed-wrapper :deep(iframe) {
+    height: 100% !important;
   }
 }
 </style>

@@ -1,107 +1,163 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Navbar from '@/components/Navbar.vue'
 import Footer from '@/components/Footer.vue'
 import EventCard from '@/components/ui/EventCard.vue'
+import { eventService } from '@/api/events'
+import { resolveMediaUrl } from '@/utils/media'
 
-// Import images from assets
-import heroImg from '@/assets/images/generation_8510.jfif'
-import imgEvent1 from '@/assets/images/image (3).jpg'
-import imgEvent2 from '@/assets/images/image (4).jpg'
-import imgEvent3 from '@/assets/images/image (5).jpg'
+gsap.registerPlugin(ScrollTrigger)
 
-const events = ref([
-  {
-    id: 1,
-    date: '20 Des 2024',
-    title: 'Tari Budaya Kalimantan Timur',
-    description: 'Dukung penampilan tari budaya Kalimantan Timur di area Teras Samarinda.',
-    image: imgEvent1,
-    link: '/events/1',
-  },
-  {
-    id: 2,
-    date: '21 Des 2024',
-    title: 'Festival Musik Tepi Mahakam',
-    description:
-      'Nikmati alunan musik dari musisi lokal sambil menikmati senja di Teras Samarinda.',
-    image: imgEvent2,
-    link: '/events/2',
-  },
-  {
-    id: 3,
-    date: '22 Des 2024',
-    title: 'Pameran UMKM Samarinda',
-    description: 'Temukan produk-produk unggulan karya anak bangsa di pameran UMKM.',
-    image: imgEvent3,
-    link: '/events/3',
-  },
-  {
-    id: 4,
-    date: '23 Des 2024',
-    title: 'Workshop Kerajinan Tangan',
-    description: 'Belajar membuat kerajinan khas lokal bersama para ahli di Teras Samarinda.',
-    image: imgEvent1,
-    link: '/events/4',
-  },
-  {
-    id: 5,
-    date: '24 Des 2024',
-    title: 'Nonton Bareng Film Lokal',
-    description: 'Saksikan karya-karya sineas lokal di area terbuka Teras Samarinda.',
-    image: imgEvent2,
-    link: '/events/5',
-  },
-  {
-    id: 6,
-    date: '25 Des 2024',
-    title: 'Car Free Day Special',
-    description: 'Olahraga pagi dengan suasana segar di sepanjang Teras Samarinda.',
-    image: imgEvent3,
-    link: '/events/6',
-  },
-])
+const events = ref([])
+const isLoading = ref(true)
+
+const heroSettings = ref({
+  page_hero_title: 'Kegiatan & Event Teras Samarinda',
+  page_hero_subtitle: 'Intip keceriaan pengunjung dan keindahan arsitektur Teras Samarinda',
+  page_hero_background_url: '',
+})
+
+const fetchEvents = async () => {
+  isLoading.value = true
+  try {
+    const [eventsRes, settingsRes] = await Promise.all([
+      eventService.getAll(),
+      eventService.getSettings(),
+    ])
+
+    if (eventsRes.data.success) {
+      events.value = eventsRes.data.data || []
+    }
+
+    if (settingsRes.data.success && settingsRes.data.data) {
+      const d = settingsRes.data.data
+      heroSettings.value = {
+        page_hero_title: d.page_hero_title || heroSettings.value.page_hero_title,
+        page_hero_subtitle: d.page_hero_subtitle || heroSettings.value.page_hero_subtitle,
+        page_hero_background_url: d.page_hero_background_url || '',
+      }
+    }
+  } catch (error) {
+    console.error('Failed to fetch events:', error)
+  } finally {
+    isLoading.value = false
+    await nextTick()
+    animateHero()
+  }
+}
+
+const animateHero = () => {
+  // Hero background parallax
+  gsap.to('.hero-bg', {
+    yPercent: -30,
+    ease: 'none',
+    scrollTrigger: {
+      trigger: '.events-hero',
+      start: 'top bottom',
+      end: 'bottom top',
+      scrub: true,
+    },
+  })
+
+  // Hero content parallax
+  gsap.to('.hero-content', {
+    yPercent: -40,
+    ease: 'none',
+    scrollTrigger: {
+      trigger: '.events-hero',
+      start: 'top bottom',
+      end: 'bottom top',
+      scrub: true,
+    },
+  })
+}
+
+const isVideoHero = (url) => {
+  if (!url) return false
+  return url.match(/\.(mp4|webm|ogg)$/i)
+}
+
+onMounted(() => {
+  fetchEvents()
+})
 </script>
 
 <template>
-  <div class="events-page">
-    <Navbar initial-light />
+  <div class="events-page page-shell">
+    <Navbar initial-light current-page="event-page" />
 
     <!-- Events Hero Section -->
-    <section class="events-hero" :style="{ backgroundImage: `url(${heroImg})` }">
-      <div class="hero-overlay"></div>
+    <section class="events-hero entrance-section">
+      <div class="hero-bg-wrapper">
+        <template v-if="heroSettings.page_hero_background_url">
+          <video
+            v-if="isVideoHero(heroSettings.page_hero_background_url)"
+            :src="resolveMediaUrl(heroSettings.page_hero_background_url)"
+            autoplay
+            muted
+            loop
+            playsinline
+            class="hero-bg"
+          ></video>
+          <img
+            v-else
+            :src="resolveMediaUrl(heroSettings.page_hero_background_url)"
+            class="hero-bg"
+            alt="Events Hero"
+          />
+        </template>
+        <div v-else class="hero-bg-placeholder bg-dark w-100 h-100"></div>
+        <div class="hero-overlay"></div>
+      </div>
       <div
         class="container h-100 d-flex flex-column justify-content-center align-items-center text-center"
       >
-        <h1 class="hero-title mb-4">
-          Kegiatan & Event <br />
-          <span class="text-italic">Teras Samarinda</span>
-        </h1>
-        <p class="hero-subtitle">
-          Teras Samarinda adalah wajah baru ruang publik Kota Samarinda yang dirancang sebagai
-          kawasan waterfront modern di tepian Sungai Mahakam.
-        </p>
-      </div>
-    </section>
-
-    <!-- Events Grid Section -->
-    <section class="events-content py-5">
-      <div class="container py-lg-5">
-        <div class="row g-4">
-          <div v-for="event in events" :key="event.id" class="col-lg-4 col-md-6">
-            <EventCard
-              :image="event.image"
-              :date="event.date"
-              :title="event.title"
-              :description="event.description"
-              :link="event.link"
-            />
-          </div>
+        <div class="hero-content position-relative">
+          <h1
+            v-entrance="{ y: 60, blur: 10 }"
+            class="hero-title mb-4"
+            v-html="heroSettings.page_hero_title"
+          ></h1>
+          <p v-entrance="{ y: 40, blur: 10, delay: 200 }" class="hero-subtitle">
+            {{ heroSettings.page_hero_subtitle }}
+          </p>
         </div>
       </div>
     </section>
 
-    <Footer />
+    <!-- Events Grid Section -->
+    <section class="events-content page-section-pad section-stack-over">
+      <div class="container py-lg-0">
+        <!-- Loading State -->
+        <div v-if="isLoading" class="text-center py-5">
+          <div class="spinner-border text-primary" role="status"></div>
+        </div>
+
+        <!-- Events Grid -->
+        <div v-else-if="events.length > 0" class="row g-4">
+          <div v-for="event in events" :key="event.id" class="col-lg-4 col-md-6">
+            <EventCard
+              :image="resolveMediaUrl(event.image)"
+              :date="event.date"
+              :title="event.name"
+              :description="event.description"
+              :link="`/events/${event.id}`"
+            />
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div v-else class="text-center py-5">
+          <p class="text-secondary fs-5">Belum ada event yang tersedia saat ini.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="position-relative" style="z-index: 10">
+      <Footer />
+    </div>
   </div>
 </template>
 
@@ -112,12 +168,34 @@ const events = ref([
 
 /* Hero Section Styles */
 .events-hero {
-  position: relative;
-  height: 600px;
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  color: #ffffff;
+  position: sticky;
+  top: 0;
+  z-index: var(--z-hero-sticky);
+  min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-bg-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.hero-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 150%;
+  object-fit: cover;
+  object-position: center;
 }
 
 .hero-overlay {
@@ -127,38 +205,43 @@ const events = ref([
   right: 0;
   bottom: 0;
   background-color: rgba(3, 61, 74, 0.75);
+  z-index: 1;
 }
 
-.hero-title {
-  font-family: 'Instrument Serif', serif;
-  font-size: clamp(3.5rem, 7vw, 5rem);
-  font-weight: 400;
-  line-height: 1;
+.hero-content {
   position: relative;
   z-index: 2;
 }
 
-.hero-title .text-italic {
+.hero-title {
+  font-family: var(--font-family-serif), 'Instrument Serif', serif;
+  font-size: var(--type-hero-display);
+  font-weight: 400;
+  line-height: 1.08;
+  color: #ffffff;
+}
+
+:deep(.hero-title span),
+.hero-title :deep(span) {
   font-style: italic;
 }
 
 .hero-subtitle {
-  font-family: 'Inter', sans-serif;
-  font-size: 1.2rem;
-  max-width: 700px;
+  font-family: var(--font-family-sans), 'Inter', sans-serif;
+  font-size: var(--type-hero-sub);
+  max-width: var(--prose-max-width);
+  margin-left: auto;
+  margin-right: auto;
   opacity: 0.9;
-  position: relative;
-  z-index: 2;
-  line-height: 1.6;
+  line-height: 1.55;
+  color: #ffffff;
 }
 
 .events-content {
   background-color: #ffffff;
 }
 
-@media (max-width: 768px) {
-  .events-hero {
-    height: 500px;
-  }
+.hero-bg-placeholder {
+  background: linear-gradient(135deg, #033d4a 0%, #0791b0 100%);
 }
 </style>

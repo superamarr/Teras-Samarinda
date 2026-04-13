@@ -37,3 +37,17 @@ __screenshots__/
 
 # Vite
 *.timestamp-*-*.mjs
+
+# Development Scripts & DB Dumps (Not needed in production)
+*.sql
+patch_*.php
+test_*.php
+seed_*.php
+check_*.php
+dump_*.php
+migrate_*.php
+alter_*.php
+fix_*.php
+/scratch/
+AGENTS.md
+PLAN.md

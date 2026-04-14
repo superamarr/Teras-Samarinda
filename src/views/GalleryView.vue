@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick, onUnmounted } from 'vue'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Navbar from '@/components/Navbar.vue'
@@ -11,6 +11,8 @@ gsap.registerPlugin(ScrollTrigger)
 
 const galleryItems = ref([])
 const isLoading = ref(true)
+const showPopup = ref(false)
+const selectedImage = ref(null)
 
 const heroSettings = ref({
   page_hero_title: 'Galeri Foto Teras Samarinda',
@@ -119,6 +121,24 @@ const isVideoHero = (url) => {
   return url.match(/\.(mp4|webm|ogg)$/i)
 }
 
+const openPopup = (item) => {
+  selectedImage.value = item
+  showPopup.value = true
+  document.body.style.overflow = 'hidden'
+}
+
+const closePopup = () => {
+  showPopup.value = false
+  selectedImage.value = null
+  document.body.style.overflow = ''
+}
+
+const onKeydown = (event) => {
+  if (showPopup.value && event.key === 'Escape') {
+    closePopup()
+  }
+}
+
 onMounted(() => {
   fetchGallery()
 
@@ -145,6 +165,13 @@ onMounted(() => {
       scrub: true,
     },
   })
+
+  window.addEventListener('keydown', onKeydown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', onKeydown)
+  document.body.style.overflow = ''
 })
 </script>
 
@@ -206,6 +233,7 @@ onMounted(() => {
             :key="item.id"
             class="gallery-grid-item"
             :style="{ gridColumn: `span ${item.colSpan}` }"
+            @click="openPopup(item)"
           >
             <div class="image-wrapper">
               <img :src="resolveMediaUrl(item.url)" :alt="item.title" class="img-fluid" />
@@ -228,6 +256,34 @@ onMounted(() => {
     <div class="position-relative" style="z-index: 10">
       <Footer />
     </div>
+
+    <!-- Image Popup -->
+    <Teleport to="body">
+      <div v-if="showPopup" class="gallery-popup" @click.self="closePopup">
+        <button class="popup-close" @click="closePopup" aria-label="Tutup">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <img
+          v-if="selectedImage"
+          :src="resolveMediaUrl(selectedImage.url)"
+          :alt="selectedImage.title"
+          class="popup-image"
+        />
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -325,6 +381,7 @@ onMounted(() => {
   overflow: hidden;
   border-radius: 4px;
   transition: transform 0.4s ease;
+  cursor: pointer;
 }
 
 @media (max-width: 992px) {
@@ -408,5 +465,62 @@ onMounted(() => {
 
 .hero-bg-placeholder {
   background: linear-gradient(135deg, #033d4a 0%, #0791b0 100%);
+}
+
+/* Image Popup */
+.gallery-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(0, 0, 0, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.popup-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.25s ease;
+}
+
+.popup-close:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.popup-image {
+  max-width: 100%;
+  max-height: 86vh;
+  object-fit: contain;
+}
+
+@media (max-width: 768px) {
+  .gallery-popup {
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.95);
+  }
+
+  .popup-close {
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 2.35rem;
+    height: 2.35rem;
+  }
+
+  .popup-image {
+    max-height: 80vh;
+  }
 }
 </style>

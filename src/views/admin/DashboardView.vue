@@ -354,15 +354,15 @@ onMounted(() => {
             <div
               v-for="(activity, index) in recentActivities"
               :key="index"
-              class="activity-item d-flex align-items-start gap-3"
+              class="activity-item d-flex align-items-start gap-3 p-2"
             >
               <div
                 class="activity-icon bg-light-subtle rounded-circle d-flex align-items-center justify-content-center"
               >
                 <i :class="['bi', getActivityIcon(activity.type), 'text-dark small']"></i>
               </div>
-              <div>
-                <p class="mb-0 small fw-medium">{{ activity.message }}</p>
+              <div class="flex-grow-1">
+                <p class="mb-0 small fw-medium text-truncate">{{ activity.message }}</p>
                 <span class="text-secondary small">{{ activity.time }}</span>
               </div>
             </div>
@@ -411,7 +411,7 @@ onMounted(() => {
 
 .activity-list {
   max-height: 320px;
-  overflow-y: hidden;
+  overflow-y: auto; /* Changed to auto to show scrollbar if needed */
   padding-right: 8px;
 }
 

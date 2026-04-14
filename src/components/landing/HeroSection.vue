@@ -30,16 +30,18 @@ const heroData = ref({
 
 const isLoading = ref(true)
 const videoLoaded = ref(false)
+const hasBackgroundImage = computed(() => !!String(heroData.value.background_image || '').trim())
+const hasVideoFile = computed(() => !!String(heroData.value.video_file || '').trim())
 
 const heroBackgroundStyle = computed(() => {
-  if (heroData.value.background_image) {
+  if (hasBackgroundImage.value) {
     return {
       backgroundImage: `url(${resolveMediaUrl(heroData.value.background_image)})`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
     }
   }
-  if (heroData.value.use_video && heroData.value.video_file) {
+  if (heroData.value.use_video && hasVideoFile.value) {
     return {
       background: 'linear-gradient(135deg, #033d4a 0%, #0791b0 100%)',
     }
@@ -50,11 +52,13 @@ const heroBackgroundStyle = computed(() => {
 })
 
 const shouldShowVideo = computed(() => {
-  return heroData.value.use_video && heroData.value.video_file && videoLoaded.value
+  // Prioritaskan background image jika tersedia dari admin.
+  if (hasBackgroundImage.value) return false
+  return heroData.value.use_video && hasVideoFile.value && videoLoaded.value
 })
 
 const hasMediaContent = computed(() => {
-  return heroData.value.background_image || (heroData.value.use_video && heroData.value.video_file)
+  return hasBackgroundImage.value || (heroData.value.use_video && hasVideoFile.value)
 })
 
 const getWords = (text) => {
@@ -167,7 +171,7 @@ onMounted(async () => {
   >
     <!-- Video Background (only shows if use_video is true and video loads successfully) -->
     <video
-      v-if="heroData.use_video && heroData.video_file"
+      v-if="heroData.use_video && hasVideoFile && !hasBackgroundImage"
       class="hero-video"
       :class="{ 'video-loaded': shouldShowVideo }"
       autoplay
@@ -314,12 +318,12 @@ onMounted(async () => {
   inset: 0;
   width: 100%;
   height: 100%;
-  /* Gradient matching the design: darker on the left/bottom, fading out to top right */
+  /* Keep media colors visible; only soft contrast layer */
   background: linear-gradient(
     to right,
-    rgba(0, 0, 0, 0.75) 0%,
-    rgba(0, 0, 0, 0.4) 50%,
-    rgba(0, 0, 0, 0.1) 100%
+    rgba(0, 0, 0, 0.18) 0%,
+    rgba(0, 0, 0, 0.08) 50%,
+    rgba(0, 0, 0, 0.02) 100%
   );
   z-index: 2;
 }

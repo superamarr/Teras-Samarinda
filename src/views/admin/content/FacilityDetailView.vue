@@ -278,7 +278,7 @@ onMounted(loadFacility)
 .upload-icon-circle { width: 50px; height: 50px; border-radius: 50%; background-color: rgba(3, 61, 74, 0.06); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; color: #033d4a; }
 
 .preview-hero-placeholder { height: 160px; background-size: cover; background-position: center; position: relative; }
-.preview-overlay { position: absolute; top:0; left:0; right:0; bottom:0; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); }
+.preview-overlay { position: absolute; top:0; left:0; right:0; bottom:0; background: linear-gradient(to top, rgba(0,0,0,0.08), transparent); }
 
 .text-truncate-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .ls-1 { letter-spacing: 1px; }

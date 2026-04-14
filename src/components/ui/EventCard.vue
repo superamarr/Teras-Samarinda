@@ -1,4 +1,8 @@
 <script setup>
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
 defineProps({
   image: {
     type: String,
@@ -21,10 +25,15 @@ defineProps({
     default: '#',
   },
 })
+
+const navigateToLink = (event) => {
+  event.preventDefault()
+  router.push(event.currentTarget.dataset.link)
+}
 </script>
 
 <template>
-  <div class="event-card">
+  <div class="event-card" :data-link="link" @click="navigateToLink">
     <div class="event-image-wrapper">
       <img :src="image" :alt="title" class="event-image" />
 
@@ -33,7 +42,7 @@ defineProps({
         <h3 class="event-title mb-3">{{ title }}</h3>
         <p class="event-description mb-4">{{ description }}</p>
 
-        <router-link :to="link" class="event-link d-flex align-items-center text-decoration-none">
+        <div class="event-link d-flex align-items-center text-decoration-none">
           <span class="me-2">Lihat Detail</span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -47,7 +56,7 @@ defineProps({
               d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"
             />
           </svg>
-        </router-link>
+        </div>
       </div>
     </div>
   </div>
@@ -57,6 +66,7 @@ defineProps({
 .event-card {
   width: 100%;
   position: relative;
+  cursor: pointer;
 }
 
 .event-image-wrapper {
@@ -85,9 +95,15 @@ defineProps({
   left: -1px;
   right: -1px;
   width: calc(100% + 2px);
-  padding: 1rem 2rem;
+  height: 38%;
+  min-height: 7.5rem;
+  padding: 0.75rem 1.15rem;
   color: #ffffff;
   z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow: hidden;
 
   /* Reinforced Glassmorphism */
   background: var(--color-glass-bg-fallback, rgba(7, 46, 54, 0.72));
@@ -109,6 +125,7 @@ defineProps({
   font-size: 0.9rem;
   opacity: 0.85;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  margin-bottom: 0.25rem !important;
 }
 
 .event-title {
@@ -118,6 +135,10 @@ defineProps({
   line-height: 1.2;
   color: #ffffff;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 0.25rem !important;
 }
 
 .event-description {
@@ -128,9 +149,11 @@ defineProps({
   color: #ffffff;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 0.4rem !important;
 }
 
 .event-link {
@@ -142,6 +165,7 @@ defineProps({
   width: fit-content;
   transition: all 0.3s ease;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  margin-top: auto;
 }
 
 .event-link:hover {
@@ -164,7 +188,8 @@ defineProps({
   }
 
   .event-content {
-    padding: 1.25rem 1.75rem;
+    min-height: 7rem;
+    padding: 0.7rem 1rem;
     border-top-left-radius: 14px;
     border-top-right-radius: 14px;
   }
@@ -176,7 +201,8 @@ defineProps({
   }
 
   .event-content {
-    padding: 1rem 1.5rem;
+    min-height: 6.8rem;
+    padding: 0.65rem 0.95rem;
     border-top-left-radius: 12px;
     border-top-right-radius: 12px;
   }
@@ -204,7 +230,8 @@ defineProps({
   }
 
   .event-content {
-    padding: 0.875rem 1.25rem;
+    min-height: 6.5rem;
+    padding: 0.6rem 0.85rem;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
   }

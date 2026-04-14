@@ -364,44 +364,46 @@ onMounted(() => {
     </div>
 
     <!-- Top Content Table -->
-    <div class="row g-4">
-      <div class="col-12">
-        <div class="bg-white p-4 rounded-4 shadow-sm border">
-          <div class="d-flex align-items-center gap-3 mb-4">
-            <div class="icon-box-small rounded-2 d-flex align-items-center justify-content-center">
-              <i class="bi bi-list-ul"></i>
+        <div class="bg-white rounded-4 shadow-sm border overflow-hidden mt-2">
+          <div class="p-4 border-bottom bg-light d-flex align-items-center gap-3">
+            <div class="icon-box-small rounded-2 d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary">
+              <i class="bi bi-bar-chart-line-fill"></i>
             </div>
-            <h5 class="mb-0 fw-bold">Top Konten</h5>
+            <h5 class="mb-0 fw-bold">Konten Paling Banyak Dilihat (Top Konten)</h5>
           </div>
           <div class="table-responsive">
-            <table class="table table-hover mb-0">
-              <thead>
-                <tr class="border-bottom">
-                  <th class="py-3 fw-semibold text-secondary">Nama Konten</th>
-                  <th class="py-3 fw-semibold text-secondary">Jenis</th>
-                  <th class="py-3 fw-semibold text-secondary">Views</th>
-                  <th class="py-3 fw-semibold text-secondary">Avg Time</th>
-                  <th class="py-3 fw-semibold text-secondary">Status</th>
+            <table class="table table-hover align-middle mb-0">
+              <thead class="bg-light border-bottom">
+                <tr>
+                  <th class="px-4 py-3 text-secondary small fw-bold text-uppercase">Nama Konten</th>
+                  <th class="px-4 py-3 text-secondary small fw-bold text-uppercase">Jenis</th>
+                  <th class="px-4 py-3 text-secondary small fw-bold text-uppercase text-center">Views</th>
+                  <th class="px-4 py-3 text-secondary small fw-bold text-uppercase text-center">Avg Time</th>
+                  <th class="px-4 py-3 text-secondary small fw-bold text-uppercase text-end">Status</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="(item, index) in topContentData" :key="index" class="border-bottom">
-                  <td class="py-3 fw-medium">{{ item.name }}</td>
-                  <td class="py-3">
-                    <span class="badge bg-light text-dark border">{{ item.type }}</span>
+                  <td class="px-4 py-3 fw-bold text-dark">{{ item.name }}</td>
+                  <td class="px-4 py-3">
+                    <span class="badge px-3 py-2 rounded-bill bg-light text-dark border fw-normal">
+                      <i class="bi bi-tag me-1 text-primary"></i>
+                      {{ item.type }}
+                    </span>
                   </td>
-                  <td class="py-3">{{ item.views }}</td>
-                  <td class="py-3">{{ item.avgTime }}</td>
-                  <td class="py-3">
-                    <span class="badge bg-success-subtle text-success">{{ item.status }}</span>
+                  <td class="px-4 py-3 text-center fw-semibold">{{ item.views.toLocaleString('id-ID') }}</td>
+                  <td class="px-4 py-3 text-center text-secondary font-monospace">{{ item.avgTime }}</td>
+                  <td class="px-4 py-3 text-end">
+                    <span class="badge px-3 py-2 rounded-bill bg-success-subtle text-success">
+                      <i class="bi bi-check-circle me-1"></i>
+                      {{ item.status }}
+                    </span>
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
-      </div>
-    </div>
   </div>
 </template>
 

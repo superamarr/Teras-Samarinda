@@ -3,7 +3,7 @@
  * Komponen terpisah agar useEmblaCarousel onMounted jalan saat viewport sudah ada di DOM.
  * (Di parent dengan v-if data, ref belum ada saat onMounted parent → Embla tidak pernah init.)
  */
-import { ref, watch, onUnmounted, nextTick } from 'vue'
+import { ref, watch, onUnmounted, onMounted, nextTick, computed } from 'vue'
 import useEmblaCarousel from 'embla-carousel-vue'
 
 const props = defineProps({
@@ -24,6 +24,12 @@ const [emblaRef, emblaApi] = useEmblaCarousel({
 
 const activeIndex = ref(0)
 const slidesInView = ref([])
+const lightboxOpen = ref(false)
+const lightboxIndex = ref(0)
+
+const currentImage = computed(() => {
+  return props.slides[lightboxIndex.value] || props.slides[0]
+})
 
 const galleryGapPx = () =>
   typeof window !== 'undefined' && window.matchMedia('(min-width: 992px)').matches ? 16 : 12
@@ -81,6 +87,30 @@ const getSlideClass = (index) => {
   return ''
 }
 
+const openLightbox = (index) => {
+  lightboxIndex.value = index
+  lightboxOpen.value = true
+  document.body.style.overflow = 'hidden'
+  nextTick(() => {
+    lightboxApi.value?.reInit()
+    setTimeout(() => {
+      lightboxApi.value?.scrollTo(index, true)
+    }, 50)
+  })
+}
+
+const closeLightbox = () => {
+  lightboxOpen.value = false
+  document.body.style.overflow = ''
+}
+
+const onKeydown = (event) => {
+  if (!lightboxOpen.value) return
+  if (event.key === 'Escape') closeLightbox()
+  if (event.key === 'ArrowLeft') lightboxApi.value?.scrollPrev()
+  if (event.key === 'ArrowRight') lightboxApi.value?.scrollNext()
+}
+
 watch(emblaApi, (api) => {
   if (!api) return
 
@@ -118,6 +148,12 @@ watch(
 
 onUnmounted(() => {
   teardownGalleryResize()
+  document.body.style.overflow = ''
+  window.removeEventListener('keydown', onKeydown)
+})
+
+onMounted(() => {
+  window.addEventListener('keydown', onKeydown)
 })
 </script>
 
@@ -138,6 +174,7 @@ onUnmounted(() => {
                 :alt="image.alt"
                 class="img-fluid w-100 h-100 object-fit-cover"
                 draggable="false"
+                @click="openLightbox(index)"
               />
             </div>
           </div>
@@ -145,6 +182,36 @@ onUnmounted(() => {
       </div>
     </div>
   </div>
+
+  <Teleport to="body">
+    <div
+      class="gallery-lightbox"
+      :class="{ 'is-visible': lightboxOpen }"
+      @click.self="closeLightbox"
+    >
+      <button class="lightbox-close" @click="closeLightbox" aria-label="Close popup">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          fill="currentColor"
+          viewBox="0 0 16 16"
+        >
+          <path
+            d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"
+          />
+        </svg>
+      </button>
+      <div class="lightbox-image-container">
+        <img
+          v-if="currentImage"
+          :src="currentImage.src"
+          :alt="currentImage.alt"
+          class="lightbox-single-image"
+        />
+      </div>
+    </div>
+  </Teleport>
 </template>
 
 <style scoped>
@@ -203,5 +270,86 @@ onUnmounted(() => {
 .image-inner img {
   user-select: none;
   -webkit-user-drag: none;
+  cursor: zoom-in;
+}
+
+.gallery-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    opacity 0.25s ease,
+    visibility 0.25s ease;
+}
+
+.gallery-lightbox.is-visible {
+  visibility: visible;
+  opacity: 1;
+}
+
+.lightbox-image-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(82vw, 980px);
+  height: min(78vh, 720px);
+}
+
+.lightbox-single-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  border: 0;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 11;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.lightbox-close svg {
+  width: 1.75rem;
+  height: 1.75rem;
+  color: #fff;
+}
+
+.lightbox-close:hover {
+  background: rgba(220, 53, 69, 0.9);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: scale(1.1) rotate(90deg);
+}
+
+@media (max-width: 768px) {
+  .lightbox-image-container {
+    width: min(92vw, 560px);
+    height: min(68vh, 560px);
+  }
+
+  .lightbox-close {
+    top: 0.75rem;
+    right: 0.75rem;
+  }
 }
 </style>

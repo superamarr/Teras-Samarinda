@@ -209,7 +209,7 @@ onMounted(loadActivity)
             >
               <template v-if="imagePreview">
                 <img :src="imagePreview" alt="Preview" class="w-100 h-100 object-fit-cover rounded-4" />
-                <div class="image-actions position-absolute top-0 end-0 p-2 d-flex gap-2">
+                <div class="image-actions position-absolute">
                   <button @click="removeImage" class="btn btn-danger btn-icon-sm rounded-circle shadow" title="Hapus Gambar"><i class="bi bi-trash"></i></button>
                   <label class="btn btn-light btn-icon-sm rounded-circle shadow cursor-pointer mx-0" title="Ganti Gambar"><i class="bi bi-camera"></i><input type="file" @change="handleImageSelect" class="d-none" accept="image/*" /></label>
                 </div>
@@ -251,12 +251,41 @@ onMounted(loadActivity)
 .btn-icon { width: 42px; height: 42px; padding: 0; display: flex; align-items: center; justify-content: center; }
 .btn-icon-sm { width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; }
 
-.upload-area-premium { aspect-ratio: 16/9; min-height: 200px; transition: all 0.3s ease; }
+.upload-area-premium {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  aspect-ratio: 16/9;
+  min-height: 200px;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
 .upload-area-premium.drag-over { border-color: #033d4a; background-color: rgba(3, 61, 74, 0.05) !important; }
 .upload-icon-circle { width: 60px; height: 60px; border-radius: 50%; background-color: rgba(3, 61, 74, 0.06); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #033d4a; }
+.image-actions {
+  top: 0.35rem;
+  right: 0.35rem;
+  display: flex;
+  gap: 0.35rem;
+  justify-content: flex-end;
+  max-width: calc(100% - 0.7rem);
+  z-index: 2;
+}
+
+.image-actions .btn-icon-sm {
+  width: 26px;
+  height: 26px;
+  font-size: 0.72rem;
+}
+
+.upload-area-premium > img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+}
 
 .preview-hero-placeholder { height: 180px; background-size: cover; background-position: center; position: relative; }
-.preview-overlay { position: absolute; top:0; left:0; right:0; bottom:0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); }
+.preview-overlay { position: absolute; top:0; left:0; right:0; bottom:0; background: linear-gradient(to top, rgba(0,0,0,0.08), transparent); }
 
 .text-truncate-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .w-fit-content { width: fit-content; }

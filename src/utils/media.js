@@ -17,7 +17,14 @@ export function resolveMediaUrl(path) {
       : import.meta.env.DEV
         ? devFallback
         : ''
-  const backendUploads =
-    apiRoot === '' ? '/uploads' : apiRoot.replace(/\/public\/?$/, '') + '/uploads'
+  let backendUploads = '/uploads'
+  if (apiRoot !== '') {
+    // Same-origin proxy setup: API at /api, static uploads at /uploads.
+    if (/\/api\/?$/.test(apiRoot)) {
+      backendUploads = '/uploads'
+    } else {
+      backendUploads = apiRoot.replace(/\/public\/?$/, '') + '/uploads'
+    }
+  }
   return `${backendUploads.replace(/\/$/, '')}/${path.replace(/^\//, '')}`
 }

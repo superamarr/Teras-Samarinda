@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { bookingService } from '@/api/bookings'
 import { eventService } from '@/api/events'
 import { useSwal } from '@/composables/useSwal'
@@ -51,6 +51,16 @@ const loadData = async () => {
 const filteredBookings = computed(() => {
   if (selectedFilter.value === 'all') return bookingData.value
   return bookingData.value.filter((b) => b.status.toLowerCase() === selectedFilter.value.toLowerCase())
+})
+const itemsPerPage = 5
+const currentPage = ref(1)
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredBookings.value.length / itemsPerPage)))
+const paginatedBookings = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage
+  return filteredBookings.value.slice(start, start + itemsPerPage)
+})
+watch([selectedFilter, filteredBookings], () => {
+  currentPage.value = 1
 })
 
 const stats = computed(() => {
@@ -177,7 +187,7 @@ onMounted(() => {
     <template v-else>
       <div class="row g-4 mb-4">
         <div class="col-6 col-md-3" v-for="(stat, index) in stats" :key="index">
-          <div class="stat-card bg-white p-4 rounded-4 shadow-sm border h-100 transition-up">
+          <div class="stat-card bg-white p-4 rounded-4 shadow-sm border h-100">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <div class="icon-box rounded-3 d-flex align-items-center justify-content-center" :style="{ color: stat.color, backgroundColor: stat.color + '15' }">
                 <i :class="['bi fs-4', stat.icon]"></i>
@@ -226,7 +236,7 @@ onMounted(() => {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="booking in filteredBookings" :key="booking.id" class="border-bottom">
+                <tr v-for="booking in paginatedBookings" :key="booking.id" class="border-bottom">
                   <td class="px-4 py-3">
                     <div class="fw-bold text-dark">{{ booking.name }}</div>
                     <div class="text-secondary smaller"><i class="bi bi-telephone me-1"></i>{{ booking.phone }}</div>
@@ -270,6 +280,34 @@ onMounted(() => {
                 </tr>
               </tbody>
             </table>
+          </div>
+          <div v-if="filteredBookings.length > itemsPerPage" class="pagination-container d-flex justify-content-between align-items-center px-4 py-3 border-top">
+            <div class="pagination-info">
+              <span class="text-secondary small">Menampilkan <strong>{{ paginatedBookings.length }}</strong> dari <strong>{{ filteredBookings.length }}</strong> data</span>
+            </div>
+            <div class="pagination-controls d-flex align-items-center gap-3">
+              <button 
+                class="pagination-btn" 
+                :disabled="currentPage === 1" 
+                @click="currentPage--"
+                title="Sebelumnya"
+              >
+                <i class="bi bi-chevron-left"></i>
+              </button>
+              
+              <div class="pagination-pages d-flex align-items-center gap-2">
+                <span class="page-indicator">Halaman <strong>{{ currentPage }}</strong> dari <strong>{{ totalPages }}</strong></span>
+              </div>
+
+              <button 
+                class="pagination-btn" 
+                :disabled="currentPage === totalPages" 
+                @click="currentPage++"
+                title="Selanjutnya"
+              >
+                <i class="bi bi-chevron-right"></i>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -355,11 +393,6 @@ onMounted(() => {
   border-color: #eef2f6 !important;
 }
 
-.transition-up:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.05) !important;
-}
-
 .smaller {
   font-size: 0.75rem;
 }
@@ -393,5 +426,49 @@ onMounted(() => {
 
 .font-monospace {
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+
+/* Pagination Styles */
+.pagination-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: #64748b;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #f8fafc;
+  color: #033d4a;
+  border-color: #033d4a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(3, 61, 74, 0.15);
+}
+
+.pagination-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+}
+
+.page-indicator {
+  font-size: 0.9rem;
+  color: #64748b;
+  background: #f8fafc;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
 }
 </style>

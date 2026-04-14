@@ -257,6 +257,19 @@ const filteredImages = computed(() => {
   })
 })
 
+const itemsPerPage = 12
+const currentPage = ref(1)
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredImages.value.length / itemsPerPage)))
+const paginatedImages = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage
+  return filteredImages.value.slice(start, start + itemsPerPage)
+})
+
+import { watch } from 'vue'
+watch([searchQuery, filterCategory], () => {
+  currentPage.value = 1
+})
+
 const openAddModal = () => {
   newImage.value = { title: '', category: 'Pemandangan', image: null }
   imagePreview.value = ''
@@ -394,35 +407,42 @@ onMounted(() => {
       <!-- Tab: List -->
       <div v-if="activeTab === 'list'" class="fade-in">
         <div class="row g-3 mb-4">
-          <div class="col-md-6">
-            <div class="input-group search-group">
+          <div class="col-md-7">
+            <div class="input-group search-group shadow-sm rounded-3 overflow-hidden">
               <span class="input-group-text bg-white border-end-0 border-2">
-                <i class="bi bi-search text-secondary"></i>
+                <i class="bi bi-search text-primary"></i>
               </span>
               <input
                 v-model="searchQuery"
                 type="text"
                 class="form-control border-start-0 border-2 ps-0 py-2 px-3"
-                placeholder="Cari gambar..."
+                placeholder="Cari foto berdasarkan judul..."
               />
             </div>
           </div>
-          <div class="col-md-3">
-            <select v-model="filterCategory" class="form-select border-2 py-2 px-3">
-              <option value="all">Semua Kategori</option>
-              <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
-            </select>
+          <div class="col-md-5">
+            <div class="d-flex gap-2">
+              <select v-model="filterCategory" class="form-select border-2 py-2 px-3 shadow-sm rounded-3">
+                <option value="all">Semua Kategori</option>
+                <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+              </select>
+            </div>
           </div>
         </div>
 
-        <div v-if="filteredImages.length === 0" class="text-center py-5 bg-light rounded-4 border-2 border-dashed">
-          <i class="bi bi-images fs-1 text-secondary"></i>
-          <p class="text-secondary mt-2">Belum ada gambar. Tambahkan gambar baru!</p>
+        <div v-if="filteredImages.length === 0" class="text-center py-5 bg-white rounded-4 border-2 border-dashed shadow-sm">
+          <div class="py-4">
+            <i class="bi bi-images fs-1 text-secondary opacity-25"></i>
+            <p class="text-secondary mt-3 fw-medium">Tidak ada foto yang ditemukan.</p>
+            <button @click="openAddModal" class="btn btn-sm btn-outline-primary rounded-pill px-4 mt-2">
+              Tambah Foto Baru
+            </button>
+          </div>
         </div>
 
         <div v-else class="row g-4">
-          <div v-for="img in filteredImages" :key="img.id" class="col-xl-3 col-lg-4 col-sm-6">
-            <div class="gallery-card shadow-sm border border-2 rounded-4 overflow-hidden h-100 bg-white">
+          <div v-for="(img, index) in paginatedImages" :key="img.id" class="col-xl-3 col-lg-4 col-sm-6">
+            <div class="gallery-card border-0 rounded-4 overflow-hidden h-100 bg-white shadow-sm position-relative">
               <div
                 class="card-img-wrapper position-relative"
                 :style="{
@@ -432,40 +452,76 @@ onMounted(() => {
                 }"
               >
                 <div class="card-overlay">
-                  <div class="d-flex gap-2">
+                  <div class="action-buttons d-flex gap-2 scale-up">
                     <button
                       @click="toggleFeatured(img.id)"
-                      class="action-btn featured-btn"
+                      class="action-btn featured-btn shadow"
                       :class="{ active: img.featured }"
-                      title="Toggle Featured"
+                      :title="img.featured ? 'Hapus dari Unggulan' : 'Jadikan Unggulan'"
                     >
                       <i class="bi" :class="img.featured ? 'bi-star-fill' : 'bi-star'"></i>
                     </button>
-                    <button @click="openEditModal(img)" class="action-btn edit-btn" title="Edit Data">
-                      <i class="bi bi-pencil-square"></i>
+                    <button @click="openEditModal(img)" class="action-btn edit-btn shadow" title="Edit Detail">
+                      <i class="bi bi-pencil-fill"></i>
                     </button>
-                    <button @click="deleteImage(img.id)" class="action-btn delete-btn" title="Hapus">
-                      <i class="bi bi-trash"></i>
+                    <button @click="deleteImage(img.id)" class="action-btn delete-btn shadow" title="Hapus Foto">
+                      <i class="bi bi-trash-fill"></i>
                     </button>
                   </div>
                 </div>
-                <span v-if="img.featured" class="featured-badge">
-                  <i class="bi bi-star-fill me-1"></i>Featured
-                </span>
+                <div class="card-badges position-absolute top-0 start-0 w-100 p-3 d-flex justify-content-between align-items-start pointer-events-none">
+                  <span class="category-badge shadow-sm">{{ img.category }}</span>
+                  <span v-if="img.featured" class="featured-badge shadow-sm">
+                    <i class="bi bi-star-fill"></i>
+                  </span>
+                </div>
               </div>
               <div class="card-body p-3">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                  <span class="category-tag">{{ img.category }}</span>
-                </div>
-                <h6 class="fw-bold text-dark mb-0 text-truncate" :title="img.title">
-                  {{ img.title || '-' }}
+                <h6 class="fw-bold text-dark mb-1 text-truncate" :title="img.title">
+                  {{ img.title || 'Tanpa Judul' }}
                 </h6>
-                <small class="text-muted d-block mt-1">
-                  <i class="bi bi-calendar3 me-1"></i>
-                  {{ new Date(img.created_at).toLocaleDateString('id-ID') }}
-                </small>
+                <div class="d-flex align-items-center justify-content-between mt-2">
+                   <div class="d-flex align-items-center text-secondary smaller">
+                    <i class="bi bi-clock-history me-1"></i>
+                    {{ new Date(img.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) }}
+                  </div>
+                  <div class="text-primary smaller fw-bold">
+                    <i class="bi bi-aspect-ratio me-1"></i>
+                    16:9
+                  </div>
+                </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div v-if="filteredImages.length > itemsPerPage" class="pagination-container d-flex justify-content-between align-items-center mt-5 px-2">
+          <div class="pagination-info">
+            <span class="text-secondary small">Menampilkan <strong>{{ paginatedImages.length }}</strong> dari <strong>{{ filteredImages.length }}</strong> foto</span>
+          </div>
+          <div class="pagination-controls d-flex align-items-center gap-3">
+            <button 
+              class="pagination-btn" 
+              :disabled="currentPage === 1" 
+              @click="currentPage--"
+              title="Sebelumnya"
+            >
+              <i class="bi bi-chevron-left"></i>
+            </button>
+            
+            <div class="pagination-pages d-flex align-items-center gap-2">
+              <span class="page-indicator">Halaman <strong>{{ currentPage }}</strong> dari <strong>{{ totalPages }}</strong></span>
+            </div>
+
+            <button 
+              class="pagination-btn" 
+              :disabled="currentPage === totalPages" 
+              @click="currentPage++"
+              title="Selanjutnya"
+            >
+              <i class="bi bi-chevron-right"></i>
+            </button>
           </div>
         </div>
       </div>
@@ -770,17 +826,18 @@ onMounted(() => {
 
 /* Gallery Card Styles */
 .gallery-card {
-  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background: white;
+  border: 1px solid #f1f5f9 !important;
 }
 
 .gallery-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+  transform: translateY(-8px);
+  box-shadow: 0 15px 30px rgba(3, 61, 74, 0.12) !important;
 }
 
 .card-img-wrapper {
-  height: 200px;
+  height: 180px;
   background-size: cover;
   background-position: center;
   background-color: #f8fafb;
@@ -792,39 +849,53 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(3, 61, 74, 0.4);
+  background: rgba(3, 61, 74, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(2px);
+  transition: all 0.35s ease;
+  backdrop-filter: blur(4px);
 }
 
 .gallery-card:hover .card-overlay {
   opacity: 1;
 }
 
+.action-buttons {
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform: translateY(20px);
+}
+
+.gallery-card:hover .action-buttons {
+  transform: translateY(0);
+}
+
 .action-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   background: white;
   color: #033d4a;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.25s ease;
 }
 
 .action-btn:hover {
-  transform: scale(1.1);
+  transform: scale(1.15);
+  background: #f8fafc;
 }
 
 .featured-btn.active {
   background: #ffc107;
+  color: white;
+}
+
+.edit-btn:hover {
+  background: #3b82f6;
   color: white;
 }
 
@@ -833,18 +904,80 @@ onMounted(() => {
   color: white;
 }
 
-.featured-badge {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  background: rgba(255, 193, 7, 0.9);
-  color: white;
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 50px;
+.category-badge {
+  background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(4px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  color: #033d4a;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 5px 12px;
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.featured-badge {
+  background: #ffc107;
+  color: white;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 0.8rem;
+}
+
+.smaller {
+  font-size: 0.75rem;
+}
+
+.pointer-events-none {
+  pointer-events: none;
+}
+
+/* Pagination Styles */
+.pagination-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: #64748b;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #f8fafc;
+  color: #033d4a;
+  border-color: #033d4a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(3, 61, 74, 0.15);
+}
+
+.pagination-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+}
+
+.page-indicator {
+  font-size: 0.9rem;
+  color: #64748b;
+  background: #f8fafc;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
 }
 
 /* Italic Control Styles */

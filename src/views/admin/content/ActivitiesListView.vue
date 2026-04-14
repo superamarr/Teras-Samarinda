@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { activityService } from '@/api/activities'
 import { useSwal } from '@/composables/useSwal'
@@ -101,6 +101,16 @@ const filteredActivities = computed(() => {
   return activities.value.filter((activity) => {
     return activity.name?.toLowerCase().includes(searchQuery.value.toLowerCase())
   })
+})
+const itemsPerPage = 5
+const currentPage = ref(1)
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredActivities.value.length / itemsPerPage)))
+const paginatedActivities = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage
+  return filteredActivities.value.slice(start, start + itemsPerPage)
+})
+watch([searchQuery, filteredActivities], () => {
+  currentPage.value = 1
 })
 
 const getImageUrl = (image) => (image ? resolveMediaUrl(image) : '')
@@ -242,7 +252,7 @@ onMounted(loadData)
             </thead>
             <tbody>
               <tr
-                v-for="activity in filteredActivities"
+                v-for="activity in paginatedActivities"
                 :key="activity.id"
                 draggable="true"
                 @dragstart="onDragStart(activity)"
@@ -295,6 +305,34 @@ onMounted(loadData)
               </tr>
             </tbody>
           </table>
+        </div>
+        <div v-if="filteredActivities.length > itemsPerPage" class="pagination-container d-flex justify-content-between align-items-center mt-4 px-2">
+          <div class="pagination-info">
+            <span class="text-secondary small">Menampilkan <strong>{{ paginatedActivities.length }}</strong> dari <strong>{{ filteredActivities.length }}</strong> data</span>
+          </div>
+          <div class="pagination-controls d-flex align-items-center gap-3">
+            <button 
+              class="pagination-btn" 
+              :disabled="currentPage === 1" 
+              @click="currentPage--"
+              title="Sebelumnya"
+            >
+              <i class="bi bi-chevron-left"></i>
+            </button>
+            
+            <div class="pagination-pages d-flex align-items-center gap-2">
+              <span class="page-indicator">Halaman <strong>{{ currentPage }}</strong> dari <strong>{{ totalPages }}</strong></span>
+            </div>
+
+            <button 
+              class="pagination-btn" 
+              :disabled="currentPage === totalPages" 
+              @click="currentPage++"
+              title="Selanjutnya"
+            >
+              <i class="bi bi-chevron-right"></i>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -523,5 +561,49 @@ onMounted(loadData)
   font-style: italic;
   box-shadow: 0 4px 12px rgba(3, 61, 74, 0.25);
   transform: translateY(-1px);
+}
+
+/* Pagination Styles */
+.pagination-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: #64748b;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #f8fafc;
+  color: #033d4a;
+  border-color: #033d4a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(3, 61, 74, 0.15);
+}
+
+.pagination-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+}
+
+.page-indicator {
+  font-size: 0.9rem;
+  color: #64748b;
+  background: #f8fafc;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
 }
 </style>

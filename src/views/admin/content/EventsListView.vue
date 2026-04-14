@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { eventService } from '@/api/events'
 import { useSwal } from '@/composables/useSwal'
@@ -152,6 +152,16 @@ const filteredEvents = computed(() => {
     return matchSearch && matchCategory
   })
 })
+const itemsPerPage = 5
+const currentPage = ref(1)
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredEvents.value.length / itemsPerPage)))
+const paginatedEvents = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage
+  return filteredEvents.value.slice(start, start + itemsPerPage)
+})
+watch([searchQuery, filterCategory, filteredEvents], () => {
+  currentPage.value = 1
+})
 
 const featuredCount = computed(() => {
   return events.value.filter((e) => e.is_featured == 1).length
@@ -288,7 +298,7 @@ onMounted(loadData)
               </tr>
             </thead>
             <tbody>
-              <tr v-for="event in filteredEvents" :key="event.id">
+              <tr v-for="event in paginatedEvents" :key="event.id">
                 <td class="px-4 py-3">
                   <div class="d-flex align-items-center gap-3">
                     <div class="thumb-wrapper rounded-3 overflow-hidden shadow-sm">
@@ -341,6 +351,13 @@ onMounted(loadData)
               </tr>
             </tbody>
           </table>
+        </div>
+        <div v-if="filteredEvents.length > itemsPerPage" class="d-flex justify-content-between align-items-center mt-3">
+          <small class="text-secondary">Halaman {{ currentPage }} dari {{ totalPages }}</small>
+          <div class="btn-group">
+            <button class="btn btn-sm btn-outline-secondary" :disabled="currentPage === 1" @click="currentPage--">Sebelumnya</button>
+            <button class="btn btn-sm btn-outline-secondary" :disabled="currentPage === totalPages" @click="currentPage++">Selanjutnya</button>
+          </div>
         </div>
       </div>
 
@@ -542,7 +559,7 @@ onMounted(loadData)
 .hero-preview-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6));
+  background: linear-gradient(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.15));
 }
 .max-w-800 {
   max-width: 800px;
@@ -602,5 +619,49 @@ onMounted(loadData)
   font-style: italic;
   box-shadow: 0 4px 12px rgba(3, 61, 74, 0.25);
   transform: translateY(-1px);
+}
+
+/* Pagination Styles */
+.pagination-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: #64748b;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #f8fafc;
+  color: #033d4a;
+  border-color: #033d4a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(3, 61, 74, 0.15);
+}
+
+.pagination-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+}
+
+.page-indicator {
+  font-size: 0.9rem;
+  color: #64748b;
+  background: #f8fafc;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
 }
 </style>

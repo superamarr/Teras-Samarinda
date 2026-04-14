@@ -22,6 +22,7 @@ const indicatorStyle = ref({})
 const isMenuOpen = ref(false)
 
 const isLandingPage = computed(() => !props.currentPage || props.currentPage === 'landing')
+const shouldHideNavbar = computed(() => isLandingPage.value && !isScrolled.value && !isMenuOpen.value)
 
 const effectiveActiveSection = computed(() => {
   if (isLandingPage.value) return activeSection.value
@@ -236,7 +237,9 @@ onUnmounted(() => {
     :duration="600"
     :class="[
       'navbar navbar-expand-lg fixed-top transition-navbar',
-      isMenuOpen && !isScrolled
+      shouldHideNavbar
+        ? 'navbar-hidden'
+        : isMenuOpen && !isScrolled
         ? 'mobile-menu-open-top'
         : isMenuOpen && isScrolled
           ? 'mobile-menu-open-scrolled'
@@ -391,11 +394,27 @@ onUnmounted(() => {
   font-family: 'Inter', sans-serif;
   z-index: 1030;
   transition:
+    transform 0.35s ease,
+    opacity 0.35s ease,
     background-color 0.3s ease,
     backdrop-filter 0.3s ease,
     border-bottom 0.3s ease,
     box-shadow 0.3s ease,
     padding 0.3s ease;
+}
+
+.navbar-hidden {
+  transform: translateY(-110%);
+  opacity: 0;
+  pointer-events: none;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.navbar:not(.navbar-hidden) {
+  transform: translateY(0);
+  opacity: 1;
 }
 
 /* Typography & Interactive Styles */

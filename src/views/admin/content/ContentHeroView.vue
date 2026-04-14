@@ -552,7 +552,7 @@ onMounted(() => {
               class="preview-box rounded-3 overflow-hidden"
               :style="{
                 background: imagePreview
-                  ? `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${imagePreview}) center/cover`
+                  ? `url(${imagePreview}) center/cover`
                   : 'linear-gradient(135deg, #033d4a 0%, #0791b0 100%)',
               }"
             >

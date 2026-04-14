@@ -14,6 +14,9 @@ dist-ssr
 coverage
 *.local
 
+# Deploy lokal → VPS (berisi IP / path — jangan di-commit)
+scripts/deploy.env
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -1,4 +1,57 @@
 <?php
+
+/**
+ * Memuat file .env (format KEY=VALUE) ke getenv() / $_ENV.
+ * - Root project: /.env (satu file dengan Docker Compose & Vite)
+ * - Cadangan: /backend/.env
+ * Nilai yang sudah disetel lingkungan (mis. dari Docker) tidak ditimpa.
+ */
+if (!function_exists('tera_load_dotenv')) {
+    function tera_load_dotenv(): void
+    {
+        $paths = [
+            dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . '.env',
+            dirname(__DIR__) . DIRECTORY_SEPARATOR . '.env',
+        ];
+        foreach ($paths as $path) {
+            if (!is_readable($path)) {
+                continue;
+            }
+            $lines = file($path, FILE_IGNORE_NEW_LINES);
+            if ($lines === false) {
+                continue;
+            }
+            foreach ($lines as $line) {
+                $line = trim($line);
+                if ($line === '' || (isset($line[0]) && $line[0] === '#')) {
+                    continue;
+                }
+                $eq = strpos($line, '=');
+                if ($eq === false) {
+                    continue;
+                }
+                $key = trim(substr($line, 0, $eq));
+                if ($key === '') {
+                    continue;
+                }
+                $value = trim(substr($line, $eq + 1));
+                $len = strlen($value);
+                if ($len >= 2 && (($value[0] === '"' && $value[$len - 1] === '"') || ($value[0] === "'" && $value[$len - 1] === "'"))) {
+                    $value = substr($value, 1, -1);
+                }
+                if (getenv($key) !== false) {
+                    continue;
+                }
+                putenv("{$key}={$value}");
+                $_ENV[$key] = $value;
+            }
+            break;
+        }
+    }
+}
+
+tera_load_dotenv();
+
 class Database {
     private static $instance = null;
     private $connection;

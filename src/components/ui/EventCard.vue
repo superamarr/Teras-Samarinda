@@ -91,8 +91,8 @@ defineProps({
 
   /* Reinforced Glassmorphism */
   background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(4.5px);
-  -webkit-backdrop-filter: blur(4.5x);
+  backdrop-filter: blur(12px) saturate(1.15);
+  -webkit-backdrop-filter: blur(12px) saturate(1.15);
   border-top: 1px solid rgba(255, 255, 255, 0.2);
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;

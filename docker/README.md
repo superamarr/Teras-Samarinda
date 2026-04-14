@@ -243,7 +243,10 @@ nano .env
 Isi minimal:
 
 - `DB_PASSWORD` — password kuat untuk MySQL.
+- `DB_HOST`, `DB_NAME`, `DB_USER` — biasanya `localhost` / `terassamarinda` / `root` di lokal; di VPS samakan `DB_NAME` & password dengan impor SQL.
 - `HTTP_PORT=80` — atau port lain jika 80 sudah dipakai.
+
+**Hubungan `.env` dengan `backend/config/connection.php`:** PHP tidak membaca `.env` secara ajaib; file `connection.php` memuat `.env` di **root project** (lalu cadangan `backend/.env`) dan mengisi `getenv()`. Nilai yang sudah diset lingkungan (misalnya oleh Docker) **tidak ditimpa**. Di **Docker Compose**, service `php` memakai `env_file: .env` untuk `DB_NAME` / `DB_USER` / `DB_PASSWORD`, sementara **`DB_HOST` dipaksa jadi `db`** (nama service MySQL di jaringan Docker), sehingga isi `DB_HOST=localhost` di `.env` Anda tetap aman untuk Laragon dan tidak mengganggu kontainer.
 
 Simpan file (di nano: Ctrl+O, Enter, Ctrl+X).
 
@@ -340,6 +343,66 @@ docker compose up -d --build
 
 ---
 
+## Bagian 11 — Deploy cepat: kode lokal → VPS (tanpa upload manual tiap file)
+
+**Konsep:** di lokal Anda **commit & push** ke Git (GitHub/GitLab). Di VPS project sudah **`git clone`** sekali. Setelah itu, setiap kali mau “refresh” server dengan kode terbaru, cukup **pull di VPS + rebuild Docker** — bisa otomatis lewat skrip dari PC Anda.
+
+Ini **bukan** live-reload seperti `npm run dev` (yang langsung menyamakan setiap ketikan). Alurnya: **push → pull di server → build ulang image**.
+
+### Satu kali di VPS
+
+1. Clone repo ke path tetap, misalnya `/home/taufik/teras-samarinda`.
+2. Isi `.env` di server, jalankan `docker compose up -d`, impor DB (seperti bagian sebelumnya).
+3. Pastikan remote Git sama dengan yang Anda pakai di lokal (`git remote -v`).
+
+### Setiap kali ada perubahan dari lokal
+
+1. Di komputer lokal:
+
+   ```bash
+   git add .
+   git commit -m "pesan commit"
+   git push origin main
+   ```
+
+   (Ganti `main` dengan nama branch Anda.)
+
+2. **Opsi A — Skrip deploy dari PC (disarankan)**  
+   - Salin `scripts/deploy.env.example` → `scripts/deploy.env`, isi `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_REMOTE_PATH`, opsional `DEPLOY_KEY` & `DEPLOY_BRANCH`.  
+   - `scripts/deploy.env` **sudah di-ignore Git** agar IP/path/kunci tidak ter-commit.  
+   - **Windows (PowerShell), dari root project:**
+
+     ```powershell
+     .\scripts\deploy-to-vps.ps1
+     ```
+
+   - **Linux / macOS / Git Bash:**
+
+     ```bash
+     chmod +x scripts/deploy-to-vps.sh
+     ./scripts/deploy-to-vps.sh
+     ```
+
+   Skrip akan SSH ke VPS, menjalankan `git pull` lalu `docker compose up -d --build`.
+
+3. **Opsi B — Manual**  
+   SSH ke VPS, lalu:
+
+   ```bash
+   cd /home/taufik/teras-samarinda
+   git pull origin main
+   docker compose up -d --build
+   ```
+
+### Catatan
+
+- **Branch:** `DEPLOY_BRANCH` di `deploy.env` harus sama dengan branch yang Anda push (mis. `main`).
+- **Kunci SSH:** `-i` / `DEPLOY_KEY` mengarah ke path **private key** `.pem` atau `id_ed25519` di PC Anda.
+- **Tanpa Git di VPS:** Anda bisa pakai `rsync`/SCP dari PC (lebih ribet); Git + pull tetap yang paling mudah untuk sinkron.
+- **CI/CD lanjutan:** bisa ditambah **GitHub Actions** agar setiap `git push` otomatis SSH ke VPS dan menjalankan perintah yang sama — pola sama dengan skrip, hanya dipicu oleh GitHub.
+
+---
+
 ## Ringkasan alur
 
 1. `ssh user@IP_VPS` → masuk server.  
@@ -350,3 +413,5 @@ docker compose up -d --build
 6. Buka `http://IP` dan uji; setelah itu pertimbangkan HTTPS dan cadangan database.
 
 Jika Anda baru pertama kali deploy, lakukan langkah **SSH → clone/upload → Docker → impor DB** secara berurutan; jangan lupa **ganti password default** di `.env` sebelum dipakai produksi.
+
+**Untuk update berikutnya:** push dari lokal → jalankan `scripts/deploy-to-vps.ps1` atau `deploy-to-vps.sh` (Bagian 11).

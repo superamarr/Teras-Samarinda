@@ -347,12 +347,23 @@ onUnmounted(() => {
 /* 3. Jarak & Efek Navbar Saat Di-Scroll (Glassmorphism) */
 .glass-nav {
   background-color: var(--color-glass-bg) !important;
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
+  /* Layer komposit + webkit: blur lebih konsisten (Chrome/Safari/Firefox) */
+  isolation: isolate;
+  transform: translateZ(0);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.2);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.2);
   border-bottom: 1px solid var(--color-glass-border);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
   padding-top: var(--spacing-sm);
   padding-bottom: var(--spacing-sm);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass-nav {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background-color: rgba(255, 255, 255, 0.92) !important;
+  }
 }
 
 /* 4. Mobile Menu Open (Top) */

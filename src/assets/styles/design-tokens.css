@@ -51,12 +51,14 @@
   --z-hero-sticky: 1;
   --z-section-over-hero: 10;
 
-  /* Glassmorphism */
-  --glass-blur: 4px;
+  /* Glassmorphism — cukup kuat agar terlihat jelas di berbagai layar / build produksi */
+  --glass-blur: 12px;
   --glass-border-radius: 16px;
 }
 
-/* ---------- Halaman publik (bukan /admin): irama tipe & baca ---------- */
+/* ---------- Halaman publik (bukan /admin): basis tipe saja ---------- */
+/* Catatan: jangan memaksa ukuran h1–h4 di sini — komponen landing punya kelas sendiri;
+   aturan heading global bisa bentrok urutan CSS di build produksi vs dev. */
 .public-site {
   font-family: var(--font-family-sans);
   font-size: var(--type-body);
@@ -74,29 +76,6 @@
 .public-site :where(small, .small) {
   font-size: var(--type-ui-sm);
   line-height: 1.5;
-}
-
-/* Judul generik di halaman publik (komponen bisa override) */
-.public-site :where(h1, .h1) {
-  font-size: var(--type-hero-display);
-  line-height: 1.12;
-  letter-spacing: -0.02em;
-}
-
-.public-site :where(h2, .h2) {
-  font-size: var(--type-heading-lg);
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-}
-
-.public-site :where(h3, .h3) {
-  font-size: var(--type-heading-sm);
-  line-height: 1.2;
-}
-
-.public-site :where(h4, .h4) {
-  font-size: clamp(1.1rem, 2vw + 0.4rem, 1.35rem);
-  line-height: 1.35;
 }
 
 /* Padding vertikal section konsisten */

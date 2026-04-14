@@ -6,6 +6,8 @@ This template should help get you started developing with Vue 3 in Vite.
 
 Panduan lengkap dari nol: **SSH ke VPS**, **unggah kode**, **jalankan Docker** — lihat **[docker/README.md](docker/README.md)**.
 
+**Update berulang dari lokal:** push ke Git lalu jalankan **`scripts/deploy-to-vps.ps1`** (Windows) atau **`scripts/deploy-to-vps.sh`** — lihat **Bagian 11** di [docker/README.md](docker/README.md).
+
 ## Recommended IDE Setup
 
 [VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).

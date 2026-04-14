@@ -64,8 +64,10 @@ section[id] {
 .glass-card {
   width: 100%;
   background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  isolation: isolate;
+  transform: translateZ(0);
+  backdrop-filter: blur(12px) saturate(1.15);
+  -webkit-backdrop-filter: blur(12px) saturate(1.15);
   border-top: 1px solid rgba(255, 255, 255, 0.2);
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;

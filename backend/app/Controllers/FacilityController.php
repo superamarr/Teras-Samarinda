@@ -19,6 +19,14 @@ class FacilityController {
             mkdir($this->uploadDir, 0755, true);
         }
     }
+
+    private function normalizeMediaPath($path, $prefix) {
+        $path = trim((string)$path);
+        if ($path === '') return '';
+        $path = ltrim($path, '/');
+        if (strpos($path, $prefix . '/') === 0) return $path;
+        return $prefix . '/' . $path;
+    }
     
     public function getAll() {
         try {
@@ -27,8 +35,7 @@ class FacilityController {
             
             foreach ($data as &$item) {
                 if (isset($item['image']) && $item['image']) {
-                    $path = $item['image'];
-                    $item['image'] = (strpos($path, '/') === 0) ? $path : 'facilities/' . $path;
+                    $item['image'] = $this->normalizeMediaPath($item['image'], 'facilities');
                 }
             }
             
@@ -43,7 +50,7 @@ class FacilityController {
         try {
             $data = $this->settingsModel->get();
             if (isset($data['page_hero_background']) && $data['page_hero_background']) {
-                $data['page_hero_background_url'] = 'facilities/' . $data['page_hero_background'];
+                $data['page_hero_background_url'] = $this->normalizeMediaPath($data['page_hero_background'], 'facilities');
             }
             
             $rawItalic = $data['section_title_italic'] ?? '[]';
@@ -120,8 +127,7 @@ class FacilityController {
             }
             
             if (isset($data['image']) && $data['image']) {
-                $path = $data['image'];
-                $data['image'] = (strpos($path, '/') === 0) ? $path : 'facilities/' . $path;
+                $data['image'] = $this->normalizeMediaPath($data['image'], 'facilities');
             }
             
             Response::success('Facility retrieved successfully', $data);

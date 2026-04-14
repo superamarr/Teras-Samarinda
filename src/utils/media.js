@@ -22,8 +22,11 @@ export function resolveMediaUrl(path) {
     // Same-origin proxy setup: API at /api, static uploads at /uploads.
     if (/\/api\/?$/.test(apiRoot)) {
       backendUploads = '/uploads'
+    } else if (/\/public\/?$/.test(apiRoot)) {
+      // Laragon/local fallback usually points to .../backend/public
+      backendUploads = `${apiRoot.replace(/\/$/, '')}/uploads`
     } else {
-      backendUploads = apiRoot.replace(/\/public\/?$/, '') + '/uploads'
+      backendUploads = `${apiRoot.replace(/\/$/, '')}/uploads`
     }
   }
   return `${backendUploads.replace(/\/$/, '')}/${path.replace(/^\//, '')}`

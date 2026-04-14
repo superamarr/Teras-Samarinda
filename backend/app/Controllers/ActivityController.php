@@ -19,6 +19,14 @@ class ActivityController {
             mkdir($this->uploadDir, 0755, true);
         }
     }
+
+    private function normalizeMediaPath($path, $prefix) {
+        $path = trim((string)$path);
+        if ($path === '') return '';
+        $path = ltrim($path, '/');
+        if (strpos($path, $prefix . '/') === 0) return $path;
+        return $prefix . '/' . $path;
+    }
     
     public function getAll() {
         try {
@@ -27,8 +35,7 @@ class ActivityController {
 
             foreach ($data as &$item) {
                 if (isset($item['image']) && $item['image']) {
-                    $path = $item['image'];
-                    $item['image'] = (strpos($path, '/') === 0) ? $path : 'activities/' . $path;
+                    $item['image'] = $this->normalizeMediaPath($item['image'], 'activities');
                 }
             }
 
@@ -43,7 +50,7 @@ class ActivityController {
         try {
             $data = $this->settingsModel->get();
             if (isset($data['page_hero_background']) && $data['page_hero_background']) {
-                $data['page_hero_background_url'] = 'activities/' . $data['page_hero_background'];
+                $data['page_hero_background_url'] = $this->normalizeMediaPath($data['page_hero_background'], 'activities');
             }
             
             $rawItalic = $data['section_title_italic'] ?? '[]';
@@ -120,8 +127,7 @@ class ActivityController {
             }
             
             if (isset($data['image']) && $data['image']) {
-                $path = $data['image'];
-                $data['image'] = (strpos($path, '/') === 0) ? $path : 'activities/' . $path;
+                $data['image'] = $this->normalizeMediaPath($data['image'], 'activities');
             }
             
             Response::success('Activity retrieved successfully', $data);

@@ -19,6 +19,14 @@ class EventController {
             mkdir($this->uploadDir, 0755, true);
         }
     }
+
+    private function normalizeMediaPath($path, $prefix) {
+        $path = trim((string)$path);
+        if ($path === '') return '';
+        $path = ltrim($path, '/');
+        if (strpos($path, $prefix . '/') === 0) return $path;
+        return $prefix . '/' . $path;
+    }
     
     public function getAll() {
         try {
@@ -34,7 +42,7 @@ class EventController {
             
             foreach ($data as &$item) {
                 if (isset($item['image']) && $item['image']) {
-                    $item['image'] = 'events/' . $item['image'];
+                    $item['image'] = $this->normalizeMediaPath($item['image'], 'events');
                 }
             }
             
@@ -49,7 +57,7 @@ class EventController {
         try {
             $data = $this->settingsModel->get();
             if ($data && isset($data['page_hero_background']) && $data['page_hero_background']) {
-                $data['page_hero_background_url'] = 'events/' . $data['page_hero_background'];
+                $data['page_hero_background_url'] = $this->normalizeMediaPath($data['page_hero_background'], 'events');
             }
             
             if ($data) {
@@ -135,7 +143,7 @@ class EventController {
             }
             
             if (isset($data['image']) && $data['image']) {
-                $data['image'] = 'events/' . $data['image'];
+                $data['image'] = $this->normalizeMediaPath($data['image'], 'events');
             }
             
             Response::success('Event retrieved successfully', $data);

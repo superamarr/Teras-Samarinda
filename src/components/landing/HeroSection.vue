@@ -32,18 +32,19 @@ const isLoading = ref(true)
 const videoLoaded = ref(false)
 const hasBackgroundImage = computed(() => !!String(heroData.value.background_image || '').trim())
 const hasVideoFile = computed(() => !!String(heroData.value.video_file || '').trim())
+const preferVideo = computed(() => !!heroData.value.use_video && hasVideoFile.value)
 
 const heroBackgroundStyle = computed(() => {
+  if (preferVideo.value) {
+    return {
+      background: 'linear-gradient(135deg, #033d4a  0%, #0791b0 100%)',
+    }
+  }
   if (hasBackgroundImage.value) {
     return {
       backgroundImage: `url(${resolveMediaUrl(heroData.value.background_image)})`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
-    }
-  }
-  if (heroData.value.use_video && hasVideoFile.value) {
-    return {
-      background: 'linear-gradient(135deg, #033d4a 0%, #0791b0 100%)',
     }
   }
   return {
@@ -52,13 +53,11 @@ const heroBackgroundStyle = computed(() => {
 })
 
 const shouldShowVideo = computed(() => {
-  // Prioritaskan background image jika tersedia dari admin.
-  if (hasBackgroundImage.value) return false
-  return heroData.value.use_video && hasVideoFile.value && videoLoaded.value
+  return preferVideo.value && videoLoaded.value
 })
 
 const hasMediaContent = computed(() => {
-  return hasBackgroundImage.value || (heroData.value.use_video && hasVideoFile.value)
+  return hasBackgroundImage.value || preferVideo.value
 })
 
 const getWords = (text) => {
@@ -171,7 +170,7 @@ onMounted(async () => {
   >
     <!-- Video Background (only shows if use_video is true and video loads successfully) -->
     <video
-      v-if="heroData.use_video && hasVideoFile && !hasBackgroundImage"
+      v-if="preferVideo"
       class="hero-video"
       :class="{ 'video-loaded': shouldShowVideo }"
       autoplay
@@ -318,12 +317,12 @@ onMounted(async () => {
   inset: 0;
   width: 100%;
   height: 100%;
-  /* Keep media colors visible; only soft contrast layer */
+  /* Neutral overlay: pertahankan warna asli foto */
   background: linear-gradient(
-    to right,
-    rgba(0, 0, 0, 0.18) 0%,
-    rgba(0, 0, 0, 0.08) 50%,
-    rgba(0, 0, 0, 0.02) 100%
+    110deg,
+    rgba(0, 0, 0, 0.52) 0%,
+    rgba(0, 0, 0, 0.32) 45%,
+    rgba(0, 0, 0, 0.08) 100%
   );
   z-index: 2;
 }

@@ -15,6 +15,14 @@ class AboutController {
             mkdir($this->uploadDir, 0755, true);
         }
     }
+
+    private function normalizeMediaPath($path, $prefix) {
+        $path = trim((string)$path);
+        if ($path === '') return '';
+        $path = ltrim($path, '/');
+        if (strpos($path, $prefix . '/') === 0) return $path;
+        return $prefix . '/' . $path;
+    }
     
     public function get() {
         $data = $this->model->get();
@@ -75,8 +83,7 @@ class AboutController {
         $imageFields = ['image_left', 'image_right', 'page_hero_background', 'welcome_image', 'story_background'];
         foreach ($imageFields as $field) {
             if (isset($data[$field]) && $data[$field]) {
-                $path = $data[$field];
-                $result[$field] = (strpos($path, '/') === 0) ? $path : 'about/' . $path;
+                $result[$field] = $this->normalizeMediaPath($data[$field], 'about');
             }
         }
         

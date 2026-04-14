@@ -21,6 +21,16 @@ class HeroController {
             mkdir($this->videoDir, 0755, true);
         }
     }
+
+    private function normalizeMediaPath($path, $prefix) {
+        $path = trim((string)$path);
+        if ($path === '') return '';
+        $path = ltrim($path, '/');
+        if (strpos($path, $prefix . '/') === 0) {
+            return $path;
+        }
+        return $prefix . '/' . $path;
+    }
     
     public function get() {
         try {
@@ -68,13 +78,11 @@ class HeroController {
             
             // Return just the filename/path, frontend will construct full URL
             if (isset($data['background_image']) && $data['background_image']) {
-                $path = $data['background_image'];
-                $result['background_image'] = (strpos($path, '/') === 0) ? $path : 'hero/' . $path;
+                $result['background_image'] = $this->normalizeMediaPath($data['background_image'], 'hero');
             }
             
             if (isset($data['video_file']) && $data['video_file']) {
-                $path = $data['video_file'];
-                $result['video_file'] = (strpos($path, '/') === 0) ? $path : 'hero/videos/' . $path;
+                $result['video_file'] = $this->normalizeMediaPath($data['video_file'], 'hero/videos');
             }
             
             if (isset($data['title_line1_italic']) && $data['title_line1_italic']) {
@@ -245,11 +253,11 @@ class HeroController {
                     return;
                 }
                 
-                if ($file['type'] === 'image/webp' || $sizeKB > 1024) {
-                    $extension = 'webp';
-                } else {
-                    $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-                    if ($extension === 'gif') $extension = 'webp';
+                // Jangan ubah ekstensi ke webp tanpa proses konversi sebenarnya.
+                // Simpan dengan ekstensi asli agar browser bisa render file dengan benar.
+                $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+                if (!in_array($extension, ['webp', 'jpg', 'jpeg', 'png', 'gif'], true)) {
+                    $extension = $file['type'] === 'image/webp' ? 'webp' : 'jpg';
                 }
                 
                 $filename = 'hero_' . time() . '.' . $extension;

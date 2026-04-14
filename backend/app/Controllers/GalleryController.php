@@ -19,6 +19,14 @@ class GalleryController {
             mkdir($this->uploadDir, 0755, true);
         }
     }
+
+    private function normalizeMediaPath($path, $prefix) {
+        $path = trim((string)$path);
+        if ($path === '') return '';
+        $path = ltrim($path, '/');
+        if (strpos($path, $prefix . '/') === 0) return $path;
+        return $prefix . '/' . $path;
+    }
     
     public function getAll() {
         try {
@@ -31,7 +39,7 @@ class GalleryController {
             
             foreach ($data as &$item) {
                 if (isset($item['url']) && $item['url']) {
-                    $item['url'] = 'gallery/' . $item['url'];
+                    $item['url'] = $this->normalizeMediaPath($item['url'], 'gallery');
                 }
             }
             
@@ -46,7 +54,7 @@ class GalleryController {
         try {
             $data = $this->settingsModel->get();
             if ($data && isset($data['page_hero_background']) && $data['page_hero_background']) {
-                $data['page_hero_background_url'] = 'gallery/' . $data['page_hero_background'];
+                $data['page_hero_background_url'] = $this->normalizeMediaPath($data['page_hero_background'], 'gallery');
             }
             
             if ($data) {
@@ -131,7 +139,7 @@ class GalleryController {
             }
             
             if (isset($data['url']) && $data['url']) {
-                $data['url'] = 'gallery/' . $data['url'];
+                $data['url'] = $this->normalizeMediaPath($data['url'], 'gallery');
             }
             
             Response::success('Image retrieved successfully', $data);
@@ -162,10 +170,10 @@ class GalleryController {
                     return;
                 }
                 
-                if ($file['type'] === 'image/webp' || $sizeKB > 1024) {
-                    $extension = 'webp';
-                } else {
-                    $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+                // Jangan paksa ekstensi webp tanpa konversi file.
+                $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+                if (!in_array($extension, ['webp', 'jpg', 'jpeg', 'png'], true)) {
+                    $extension = $file['type'] === 'image/webp' ? 'webp' : 'jpg';
                 }
                 
                 $filename = 'gallery_' . time() . '.' . $extension;

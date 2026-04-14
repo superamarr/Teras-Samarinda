@@ -282,6 +282,7 @@ onMounted(() => {
 .event-status {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   padding: 6px 16px;
   border-radius: 100px;
   width: fit-content;

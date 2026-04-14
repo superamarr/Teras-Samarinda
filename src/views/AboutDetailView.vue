@@ -379,6 +379,7 @@ onMounted(async () => {
 .story-card {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-radius: 4px;
   position: relative;
   z-index: 2;

@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.5",
+    "autoprefixer": "^10.5.0",
     "prettier": "3.8.1",
     "vite": "^8.0.3",
     "vite-plugin-vue-devtools": "^8.1.1"

@@ -3,7 +3,6 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
-import { Features } from 'lightningcss'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -17,14 +16,7 @@ export default defineConfig({
     },
   },
   build: {
-    cssMinify: 'lightningcss',
-  },
-  css: {
-    lightningcss: {
-      // Nonaktifkan vendor-prefixing bawaan LightningCSS agar
-      // autoprefixer (PostCSS) yang menangani prefix.
-      // Ini mencegah LightningCSS menghapus backdrop-filter unprefixed.
-      include: Features.Nesting,
-    },
+    // Keep both standard and -webkit backdrop-filter in output CSS.
+    cssMinify: 'esbuild',
   },
 })

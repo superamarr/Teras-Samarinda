@@ -52,28 +52,40 @@ if (!function_exists('tera_load_dotenv')) {
 
 tera_load_dotenv();
 
+if (!function_exists('tera_env_first')) {
+    function tera_env_first(array $keys, ?string $default = null): ?string
+    {
+        foreach ($keys as $key) {
+            $value = getenv($key);
+            if ($value !== false && $value !== '') {
+                return $value;
+            }
+        }
+        return $default;
+    }
+}
+
 class Database {
     private static $instance = null;
     private $connection;
     
     private $host;
+    private $port;
     private $dbname;
     private $username;
     private $password;
 
     private function __construct() {
-        $this->host = getenv('DB_HOST') !== false && getenv('DB_HOST') !== ''
-            ? getenv('DB_HOST')
-            : 'localhost';
-        $this->dbname = getenv('DB_NAME') !== false && getenv('DB_NAME') !== ''
-            ? getenv('DB_NAME')
-            : 'terassamarinda';
-        $this->username = getenv('DB_USER') !== false && getenv('DB_USER') !== ''
-            ? getenv('DB_USER')
-            : 'root';
-        $this->password = getenv('DB_PASSWORD') !== false ? getenv('DB_PASSWORD') : '';
+        // Prioritas env:
+        // 1) DB_* (lokal/docker compose existing)
+        // 2) MYSQL* (Railway MySQL variables)
+        $this->host = tera_env_first(['DB_HOST', 'MYSQLHOST'], 'localhost');
+        $this->port = tera_env_first(['DB_PORT', 'MYSQLPORT'], '3306');
+        $this->dbname = tera_env_first(['DB_NAME', 'MYSQLDATABASE'], 'terassamarinda');
+        $this->username = tera_env_first(['DB_USER', 'MYSQLUSER'], 'root');
+        $this->password = tera_env_first(['DB_PASSWORD', 'MYSQLPASSWORD'], '');
 
-        $dsn = "mysql:host={$this->host};dbname={$this->dbname};charset=utf8mb4";
+        $dsn = "mysql:host={$this->host};port={$this->port};dbname={$this->dbname};charset=utf8mb4";
         
         try {
             $this->connection = new PDO($dsn, $this->username, $this->password);

@@ -1,16 +1,31 @@
 <?php
-$origin = $_SERVER['HTTP_ORIGIN'] ?? '*';
-header("Access-Control-Allow-Origin: $origin");
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
-header('Access-Control-Allow-Credentials: true');
+require_once __DIR__ . '/../config/connection.php';
+
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+$allowedOriginsRaw = getenv('CORS_ALLOWED_ORIGINS') !== false ? getenv('CORS_ALLOWED_ORIGINS') : '*';
+$allowedOrigins = array_values(array_filter(array_map('trim', explode(',', $allowedOriginsRaw))));
+$allowAnyOrigin = in_array('*', $allowedOrigins, true) || count($allowedOrigins) === 0;
+$isAllowedOrigin = $allowAnyOrigin || ($origin !== '' && in_array($origin, $allowedOrigins, true));
+
+if ($isAllowedOrigin) {
+    if ($allowAnyOrigin && $origin === '') {
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Credentials: false');
+    } else {
+        header("Access-Control-Allow-Origin: " . ($allowAnyOrigin ? $origin : $origin));
+        header('Access-Control-Allow-Credentials: true');
+        header('Vary: Origin');
+    }
+}
+
+header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
+    http_response_code(204);
     exit;
 }
 
-require_once __DIR__ . '/../config/connection.php';
 require_once __DIR__ . '/../helpers/Response.php';
 require_once __DIR__ . '/../helpers/Auth.php';
 

@@ -34,6 +34,17 @@ $auth = new Auth();
 $method = $_SERVER['REQUEST_METHOD'];
 $requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '/';
 $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/index.php'));
+$apiPrefix = getenv('API_PREFIX') !== false && getenv('API_PREFIX') !== ''
+    ? '/' . trim(getenv('API_PREFIX'), '/')
+    : '/api';
+
+if ($apiPrefix !== '/' && strpos($requestPath, $apiPrefix) === 0) {
+    $requestPath = substr($requestPath, strlen($apiPrefix));
+    if ($requestPath === '' || $requestPath === false) {
+        $requestPath = '/';
+    }
+}
+
 if ($scriptDir !== '/' && $scriptDir !== '' && strpos($requestPath, $scriptDir) === 0) {
     $uri = substr($requestPath, strlen($scriptDir));
 } else {

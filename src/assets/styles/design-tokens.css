@@ -53,7 +53,7 @@
   --z-section-over-hero: 10;
 
   /* Glassmorphism — cukup kuat agar terlihat jelas di berbagai layar / build produksi */
-  --glass-blur: 10px;
+  --glass-blur: 4px;
   --glass-border-radius: 16px;
 }
 

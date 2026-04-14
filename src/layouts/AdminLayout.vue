@@ -11,7 +11,7 @@ const toggleSidebar = () => {
 </script>
 
 <template>
-  <div class="admin-layout d-flex">
+  <div class="admin-layout admin-app d-flex">
     <!-- Overlay for mobile -->
     <div 
       v-if="isSidebarOpen" 
@@ -38,6 +38,20 @@ const toggleSidebar = () => {
 </template>
 
 <style scoped>
+/* Tipografi tetap mengikuti pola dashboard (tidak memakai skala fluid publik) */
+.admin-app {
+  font-size: 1rem;
+  line-height: 1.5;
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    sans-serif;
+}
+
 .admin-layout {
   height: 100vh;
   overflow: hidden;

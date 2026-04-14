@@ -29,16 +29,17 @@
   --font-size-sm: 0.875rem;
   --font-size-lg: 1.125rem;
 
-  /* Skala tipe responsif — dipakai di landing + halaman dalam */
-  --type-hero-display: clamp(2.35rem, 6vw + 0.35rem, 3.85rem);
-  --type-hero-sub: clamp(0.92rem, 0.4vw + 0.84rem, 1.08rem);
-  --type-heading: clamp(2rem, 4.2vw + 0.35rem, 3.25rem);
-  --type-heading-lg: clamp(2.1rem, 4.5vw + 0.4rem, 3.5rem);
-  --type-heading-sm: clamp(1.65rem, 3.2vw + 0.45rem, 2.65rem);
-  --type-body: clamp(0.9rem, 0.35vw + 0.82rem, 1.05rem);
-  --type-body-relaxed: clamp(0.95rem, 0.38vw + 0.86rem, 1.1rem);
-  --type-list-item: clamp(1.2rem, 2.2vw + 0.55rem, 2.35rem);
-  --type-ui-sm: 0.8rem;
+  /* Skala tipe responsif — mobile-first: minimum dibaca nyaman di ≤375px */
+  --type-hero-display: clamp(2rem, 5.5vw + 0.5rem, 3.85rem);
+  --type-hero-sub: clamp(0.9rem, 0.45vw + 0.8rem, 1.08rem);
+  --type-heading: clamp(1.75rem, 3.8vw + 0.4rem, 3.25rem);
+  --type-heading-lg: clamp(1.85rem, 4vw + 0.45rem, 3.5rem);
+  --type-heading-sm: clamp(1.45rem, 2.8vw + 0.5rem, 2.65rem);
+  --type-body: clamp(0.9375rem, 0.28vw + 0.85rem, 1.0625rem);
+  --type-body-relaxed: clamp(0.95rem, 0.35vw + 0.86rem, 1.1rem);
+  --type-list-item: clamp(1.05rem, 2vw + 0.5rem, 2.35rem);
+  --type-ui-sm: clamp(0.75rem, 0.2vw + 0.72rem, 0.875rem);
+  --type-nav-link: clamp(0.875rem, 0.25vw + 0.8rem, 0.95rem);
 
   /* Lebar baca & irama vertikal */
   --prose-max-width: 42rem;
@@ -53,6 +54,49 @@
   /* Glassmorphism */
   --glass-blur: 4px;
   --glass-border-radius: 16px;
+}
+
+/* ---------- Halaman publik (bukan /admin): irama tipe & baca ---------- */
+.public-site {
+  font-family: var(--font-family-sans);
+  font-size: var(--type-body);
+  line-height: 1.65;
+  font-feature-settings: 'kern' 1;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.public-site :where(p, li, dd, dt) {
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.public-site :where(small, .small) {
+  font-size: var(--type-ui-sm);
+  line-height: 1.5;
+}
+
+/* Judul generik di halaman publik (komponen bisa override) */
+.public-site :where(h1, .h1) {
+  font-size: var(--type-hero-display);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+
+.public-site :where(h2, .h2) {
+  font-size: var(--type-heading-lg);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.public-site :where(h3, .h3) {
+  font-size: var(--type-heading-sm);
+  line-height: 1.2;
+}
+
+.public-site :where(h4, .h4) {
+  font-size: clamp(1.1rem, 2vw + 0.4rem, 1.35rem);
+  line-height: 1.35;
 }
 
 /* Padding vertikal section konsisten */

@@ -17,7 +17,7 @@ const props = defineProps({
 
 const isScrolled = ref(false)
 const activeSection = ref('hero')
-const navRef = ref(null)
+const navListRef = ref(null)
 const indicatorStyle = ref({})
 const isMenuOpen = ref(false)
 
@@ -57,16 +57,24 @@ const handleScroll = () => {
   }
 }
 
-// Update indicator position
-const updateIndicator = () => {
-  if (!navRef.value) return
+const INDICATOR_HEIGHT = 2
 
-  const activeLink = navRef.value.querySelector('.nav-link.active')
-  if (activeLink) {
-    indicatorStyle.value = {
-      left: `${activeLink.offsetLeft}px`,
-      width: `${activeLink.offsetWidth}px`,
-    }
+// Posisi indikator relatif ke <ul> (bekerja untuk nav horizontal & vertikal / mobile)
+const updateIndicator = () => {
+  const ul = navListRef.value
+  if (!ul) return
+
+  const activeLink = ul.querySelector('.nav-link.active')
+  if (!activeLink) return
+
+  const ulRect = ul.getBoundingClientRect()
+  const linkRect = activeLink.getBoundingClientRect()
+
+  indicatorStyle.value = {
+    left: `${linkRect.left - ulRect.left + ul.scrollLeft}px`,
+    top: `${linkRect.bottom - ulRect.top + ul.scrollTop - INDICATOR_HEIGHT}px`,
+    width: `${linkRect.width}px`,
+    height: `${INDICATOR_HEIGHT}px`,
   }
 }
 
@@ -161,6 +169,10 @@ watch(effectiveActiveSection, () => {
   })
 })
 
+watch(isMenuOpen, () => {
+  nextTick(() => updateIndicator())
+})
+
 // Lifecycle hooks dengan cleanup yang proper
 onMounted(() => {
   // Setup scroll listener
@@ -178,7 +190,12 @@ onMounted(() => {
     navbarCollapse.addEventListener('hide.bs.collapse', () => {
       isMenuOpen.value = false
     })
+    navbarCollapse.addEventListener('shown.bs.collapse', () => {
+      nextTick(() => updateIndicator())
+    })
   }
+
+  window.addEventListener('resize', debouncedUpdateIndicator)
 
   // Initial indicator position
   nextTick(() => {
@@ -189,6 +206,7 @@ onMounted(() => {
 onUnmounted(() => {
   // Cleanup scroll listener
   window.removeEventListener('scroll', handleScroll)
+  window.removeEventListener('resize', debouncedUpdateIndicator)
 
   // Cleanup debounce timer
   if (debounceTimer) {
@@ -232,19 +250,26 @@ onUnmounted(() => {
     <div class="container">
       <!-- Logo/Brand -->
       <a
-        :class="[
-          'navbar-brand fw-bold fs-5',
-          (initialLight && !isScrolled) || (isMenuOpen && !isScrolled) ? 'text-white' : 'text-dark',
-        ]"
+        class="navbar-brand d-flex align-items-center gap-2"
         href="#hero"
         @click.prevent="scrollToSection('hero')"
-        >TeraSamarinda</a
       >
+        <img src="@/assets/icons/logo.svg" alt="TeraSamarinda" height="38" />
+        <span
+          class="fw-bold"
+          :class="
+            (initialLight && !isScrolled) || (isMenuOpen && !isScrolled)
+              ? 'text-white'
+              : 'text-dark'
+          "
+          >TeraSamarinda</span
+        >
+      </a>
 
       <!-- Hamburger Menu for Mobile -->
       <button
         :class="[
-          'navbar-toggler border-0 shadow-none',
+          'navbar-toggler border-0 shadow-none ms-auto',
           (initialLight && !isScrolled) || (isMenuOpen && !isScrolled)
             ? 'navbar-toggler-light'
             : '',
@@ -259,9 +284,15 @@ onUnmounted(() => {
         <span class="navbar-toggler-icon"></span>
       </button>
 
-      <!-- Navigation Links -->
-      <div ref="navRef" class="collapse navbar-collapse justify-content-end" id="navbarContent">
-        <ul class="navbar-nav gap-lg-4 align-items-center mt-3 mt-lg-0 position-relative">
+      <!-- Navigation Links: tengah di mobile/tablet, kanan di desktop (lg+) -->
+      <div
+        class="collapse navbar-collapse justify-content-center justify-content-lg-end flex-grow-1"
+        id="navbarContent"
+      >
+        <ul
+          ref="navListRef"
+          class="navbar-nav mx-auto mx-lg-0 gap-lg-4 align-items-center mt-3 mt-lg-0 position-relative text-center text-lg-start"
+        >
           <!-- Sliding Indicator -->
           <span
             :class="[
@@ -358,7 +389,7 @@ onUnmounted(() => {
 
 .nav-link {
   position: relative;
-  font-size: 0.95rem;
+  font-size: var(--type-nav-link, 0.95rem);
   transition: color 0.2s ease;
 }
 
@@ -378,19 +409,34 @@ onUnmounted(() => {
   color: #ffffff !important;
 }
 
-/* Sliding Indicator */
+/* Sliding Indicator (left/top/width di-set via JS agar cocok desktop & mobile) */
 .nav-indicator {
   position: absolute;
-  bottom: 0;
+  top: 0;
   left: 0;
   height: 2px;
   border-radius: 2px;
-  will-change: left, width;
+  will-change: left, top, width;
   transform: translateZ(0);
   transition:
     left 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    top 0.4s cubic-bezier(0.4, 0, 0.2, 1),
     width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
+}
+
+@media (max-width: 991px) {
+  .navbar-nav .nav-item {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  .navbar-nav .nav-link {
+    display: inline-block;
+    text-align: center;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
 }
 
 .nav-indicator-dark {
@@ -399,5 +445,8 @@ onUnmounted(() => {
 
 .nav-indicator-light {
   background-color: #ffffff;
+}
+
+.logo-img {
 }
 </style>

@@ -150,7 +150,7 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to, from) => {
   const authStore = useAuthStore()
   const isAuthenticated = authStore.isAuthenticated
 
@@ -158,19 +158,19 @@ router.beforeEach(async (to, from, next) => {
     if (!isAuthenticated) {
       const valid = await authStore.checkAuth()
       if (!valid) {
-        return next('/login')
+        return '/login'
       }
     }
   }
 
   if (to.meta.guest && isAuthenticated) {
-    return next('/admin/dashboard')
+    return '/admin/dashboard'
   }
 
   // Check Superadmin Role
   if (to.meta.requiresSuperAdmin) {
     if (authStore.user?.role !== 'superadmin') {
-      return next('/admin/dashboard')
+      return '/admin/dashboard'
     }
   }
 
@@ -180,14 +180,14 @@ router.beforeEach(async (to, from, next) => {
       const settingsRes = await systemService.getSettings()
       if (settingsRes.data.success) {
         const isMaintenance = settingsRes.data.data.maintenance_mode === 1
-        
+
         if (to.name === 'maintenance') {
           if (!isMaintenance) {
-            return next('/')
+            return '/'
           }
         } else {
           if (isMaintenance) {
-            return next('/maintenance')
+            return '/maintenance'
           }
         }
       }
@@ -200,8 +200,6 @@ router.beforeEach(async (to, from, next) => {
   if (!to.path.startsWith('/admin') && to.name !== 'login') {
     authStore.logout()
   }
-
-  next()
 })
 
 export default router

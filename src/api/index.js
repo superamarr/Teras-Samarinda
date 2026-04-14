@@ -1,7 +1,9 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: 'http://localhost/TeraSamarinda/backend/public',
+  baseURL:
+    import.meta.env.VITE_API_BASE_URL ||
+    'http://localhost/pa/Teras-Samarinda/backend/public',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

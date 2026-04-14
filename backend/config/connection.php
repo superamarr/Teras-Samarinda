@@ -3,12 +3,23 @@ class Database {
     private static $instance = null;
     private $connection;
     
-    private $host = 'localhost';
-    private $dbname = 'terasamarinda';
-    private $username = 'root';
-    private $password = '';
-    
+    private $host;
+    private $dbname;
+    private $username;
+    private $password;
+
     private function __construct() {
+        $this->host = getenv('DB_HOST') !== false && getenv('DB_HOST') !== ''
+            ? getenv('DB_HOST')
+            : 'localhost';
+        $this->dbname = getenv('DB_NAME') !== false && getenv('DB_NAME') !== ''
+            ? getenv('DB_NAME')
+            : 'terassamarinda';
+        $this->username = getenv('DB_USER') !== false && getenv('DB_USER') !== ''
+            ? getenv('DB_USER')
+            : 'root';
+        $this->password = getenv('DB_PASSWORD') !== false ? getenv('DB_PASSWORD') : '';
+
         $dsn = "mysql:host={$this->host};dbname={$this->dbname};charset=utf8mb4";
         
         try {

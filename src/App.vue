@@ -1,7 +1,12 @@
 <script setup>
-import { onMounted } from 'vue'
-import { RouterView } from 'vue-router'
+import { computed, onMounted } from 'vue'
+import { RouterView, useRoute } from 'vue-router'
 import { systemService } from '@/api/system'
+
+const route = useRoute()
+
+/** Halaman publik (landing, galeri, login, …) — skala tipografi global; admin dikecualikan */
+const isPublicSite = computed(() => !route.path.startsWith('/admin'))
 
 onMounted(async () => {
   try {
@@ -16,7 +21,9 @@ onMounted(async () => {
 </script>
 
 <template>
-  <RouterView />
+  <div class="app-root" :class="{ 'public-site': isPublicSite }">
+    <RouterView />
+  </div>
 </template>
 
 <style>
@@ -37,14 +44,20 @@ body {
   overflow: visible;
 }
 
+.app-root {
+  width: 100%;
+  max-width: 100%;
+  min-height: 100%;
+}
+
 /* Smooth scroll behavior for anchor links */
 html {
   scroll-behavior: smooth;
 }
 
-/* Scroll margin for sections to account for fixed navbar */
+/* Scroll margin untuk anchor — menyesuaikan tinggi navbar di mobile */
 section[id] {
-  scroll-margin-top: 80px;
+  scroll-margin-top: clamp(4rem, 14vw, 5.25rem);
 }
 
 /* Global Glassmorphism Card */

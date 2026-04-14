@@ -9,9 +9,13 @@ defineProps({
 })
 
 const activities = ref([])
+const DEFAULT_CAPTION =
+  'Dari sudut-sudut estetik yang tenang hingga energi pameran UMKM dan festival musik, Teras Samarinda menyajikan sisi terbaik Samarinda dalam satu ruang terpadu.'
+
 const sectionSettings = ref({
   section_title: 'Aktivitas Yang Bisa Anda Lakukan',
   section_subtitle: 'Beragam kegiatan menarik sering diadakan di Teras Samarinda.',
+  section_subtitle_extra: DEFAULT_CAPTION,
   layout_type: 'default',
   section_title_italic: [],
 })
@@ -66,6 +70,12 @@ const isItalic = (word) => {
 const currentImage = computed(
   () => activityList.value[activeIndex.value]?.image || '/images/placeholder.jpg',
 )
+
+const footerCaption = computed(() => {
+  const raw = sectionSettings.value.section_subtitle_extra
+  const t = typeof raw === 'string' ? raw.trim() : ''
+  return t || DEFAULT_CAPTION
+})
 
 let observer = null
 
@@ -200,10 +210,9 @@ const handleSectionWheel = (e) => {
                 />
               </div>
 
-              <!-- Teks Tambahan Paling Bawah (Ikut ke Scroll) -->
-              <p class="mt-4 pt-4 mb-5 caption-text text-secondary">
-                Dari sudut-sudut estetik yang tenang hingga energi pameran UMKM dan festival musik,
-                Teras Samarinda menyajikan sisi terbaik Samarinda dalam satu ruang terpadu.
+              <!-- Teks penutup (dikelola dari dashboard → Section Beranda) -->
+              <p class="mt-4 pt-4 mb-4 mb-md-5 caption-text text-secondary text-break">
+                {{ footerCaption }}
               </p>
             </div>
           </div>
@@ -314,7 +323,14 @@ const handleSectionWheel = (e) => {
 
 .caption-text {
   font-family: var(--font-family-sans), 'Inter', sans-serif;
-  font-size: 1rem;
+  font-size: clamp(0.9375rem, 2.8vw, 1rem);
   line-height: 1.6;
+  max-width: 100%;
+}
+
+@media (min-width: 992px) {
+  .caption-text {
+    max-width: min(42rem, 100%);
+  }
 }
 </style>

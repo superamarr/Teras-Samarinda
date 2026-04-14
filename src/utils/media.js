@@ -9,6 +9,15 @@ export function resolveMediaUrl(path) {
     return publicMatch[0].startsWith('/') ? publicMatch[0] : `/${publicMatch[0]}`;
   }
 
-  const backendUploads = 'http://localhost/TeraSamarinda/backend/uploads'
-  return `${backendUploads}/${path.replace(/^\//, '')}`
+  const raw = import.meta.env.VITE_API_BASE_URL
+  const devFallback = 'http://localhost/pa/Teras-Samarinda/backend/public'
+  const apiRoot =
+    raw != null && raw !== ''
+      ? raw.replace(/\/$/, '')
+      : import.meta.env.DEV
+        ? devFallback
+        : ''
+  const backendUploads =
+    apiRoot === '' ? '/uploads' : apiRoot.replace(/\/public\/?$/, '') + '/uploads'
+  return `${backendUploads.replace(/\/$/, '')}/${path.replace(/^\//, '')}`
 }

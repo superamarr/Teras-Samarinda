@@ -17,13 +17,26 @@ require_once __DIR__ . '/../helpers/Auth.php';
 $auth = new Auth();
 
 $method = $_SERVER['REQUEST_METHOD'];
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$uri = str_replace('/TeraSamarinda/backend/public', '', $uri);
+$requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '/';
+$scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/index.php'));
+if ($scriptDir !== '/' && $scriptDir !== '' && strpos($requestPath, $scriptDir) === 0) {
+    $uri = substr($requestPath, strlen($scriptDir));
+} else {
+    $uri = $requestPath;
+}
 $uri = trim($uri, '/');
 
 $segments = explode('/', $uri);
 $controller = $segments[0] ?? '';
 $id = $segments[1] ?? null;
+
+// Debug: return parsing info in response for troubleshooting
+$debug = [
+    'uri' => $uri,
+    'segments' => $segments,
+    'controller' => $controller,
+    'id' => $id
+];
 
 try {
     switch ($controller) {
@@ -239,9 +252,23 @@ try {
             break;
             
         default:
-            Response::error('Endpoint not found', 404);
+            header('Content-Type: application/json');
+            http_response_code(404);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Endpoint not found',
+                'debug' => $debug
+            ]);
     }
 } catch (Exception $e) {
-    error_log($e->getMessage());
-    Response::error('Internal server error', 500);
+    error_log("API Error: " . $e->getMessage() . " | Trace: " . $e->getTraceAsString());
+    header('Content-Type: application/json');
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Internal server error',
+        'error_detail' => $e->getMessage(),
+        'file' => $e->getFile(),
+        'line' => $e->getLine()
+    ]);
 }

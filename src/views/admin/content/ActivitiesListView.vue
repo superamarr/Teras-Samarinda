@@ -344,6 +344,22 @@ onMounted(loadData)
                   rows="3"
                 ></textarea>
               </div>
+
+              <div class="col-12">
+                <label class="form-label small fw-bold text-uppercase text-secondary"
+                  >Teks penutup (bawah daftar aktivitas)</label
+                >
+                <textarea
+                  v-model="sectionSettings.section_subtitle_extra"
+                  class="form-control border-2 py-2 px-3 rounded-3"
+                  rows="4"
+                  placeholder="Teks yang tampil di bagian bawah kolom daftar aktivitas pada beranda."
+                ></textarea>
+                <small class="text-muted d-block mt-2">
+                  Biasanya berisi narasi singkat tentang pengalaman di Teras Samarinda. Teks ini responsif di
+                  perangkat mobile.
+                </small>
+              </div>
             </div>
 
             <div class="mt-5 text-end">

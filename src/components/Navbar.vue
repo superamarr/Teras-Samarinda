@@ -330,16 +330,22 @@ onUnmounted(() => {
 
 /* 1. Jarak Navbar Saat di Atas (Transparan - Teks Gelap) */
 .transparent-nav {
-  background-color: transparent !important;
-  border-bottom: none;
+  background-color: rgba(255, 255, 255, 0.72) !important;
+  backdrop-filter: blur(calc(var(--glass-blur) - 4px)) saturate(1.15);
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) - 4px)) saturate(1.15);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
   padding-top: 0.8rem;
   padding-bottom: 0.8rem;
 }
 
 /* 2. Navbar Saat di Atas (Transparan - Teks Putih) */
 .light-nav {
-  background-color: transparent !important;
-  border-bottom: none;
+  background-color: rgba(7, 46, 54, 0.32) !important;
+  backdrop-filter: blur(calc(var(--glass-blur) - 4px)) saturate(1.2);
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) - 4px)) saturate(1.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
   padding-top: 0.8rem;
   padding-bottom: 0.8rem;
 }

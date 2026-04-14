@@ -247,7 +247,7 @@ onUnmounted(() => {
               : 'transparent-nav',
     ]"
   >
-    <div class="container">
+    <div class="container-fluid px-3 px-md-4 px-lg-5">
       <!-- Logo/Brand -->
       <a
         class="navbar-brand d-flex align-items-center gap-2"

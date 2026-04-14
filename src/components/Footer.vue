@@ -31,10 +31,10 @@ onMounted(loadContact)
 
 <template>
   <footer class="footer-section">
-    <div class="container footer-container">
+    <div class="container-fluid px-3 px-md-4 px-lg-5 footer-container">
       <div class="row gy-5 justify-content-between gx-lg-5">
         <!-- Column 1: Brand & Social -->
-        <div class="col-lg-3 col-md-6">
+        <div class="col-lg-4 col-md-6">
           <div class="footer-brand mb-4">
             <h3 class="brand-title">Teras Samarinda</h3>
           </div>
@@ -85,7 +85,7 @@ onMounted(loadContact)
         </div>
 
         <!-- Column 2: Menu Utama -->
-        <div class="col-lg-3 col-md-6 col-6">
+        <div class="col-lg-2 col-md-6 col-6">
           <h6 class="footer-heading mb-4">MENU UTAMA</h6>
           <ul class="footer-links list-unstyled">
             <li><a href="#">Beranda</a></li>
@@ -98,7 +98,7 @@ onMounted(loadContact)
         </div>
 
         <!-- Column 3: Informasi -->
-        <div class="col-lg-3 col-md-6 col-6">
+        <div class="col-lg-2 col-md-6 col-6">
           <h6 class="footer-heading mb-4">INFORMASI</h6>
           <ul class="footer-links list-unstyled">
             <li><a href="#">Fasilitas</a></li>
@@ -110,7 +110,7 @@ onMounted(loadContact)
         </div>
 
         <!-- Column 4: Kontak -->
-        <div class="col-lg-3 col-md-6">
+        <div class="col-lg-4 col-md-6">
           <h6 class="footer-heading mb-4">KONTAK</h6>
           <ul class="contact-info list-unstyled">
             <li class="d-flex align-items-center gap-3 mb-3">
@@ -150,11 +150,12 @@ onMounted(loadContact)
               </svg>
               <span>{{ contactData.phone }}</span>
             </li>
-            <li class="d-flex align-items-center gap-3">
+            <li class="d-flex align-items-start gap-3">
               <svg
+                class="flex-shrink-0 mt-1"
                 xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
+                width="18"
+                height="18"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -272,16 +273,5 @@ onMounted(loadContact)
   }
 }
 
-/* Consistent column margins */
-.footer-container .row > [class*='col-'] {
-  padding-left: var(--spacing-md) !important;
-  padding-right: var(--spacing-md) !important;
-}
 
-@media (min-width: 992px) {
-  .footer-container .row > [class*='col-'] {
-    padding-left: var(--spacing-lg) !important;
-    padding-right: var(--spacing-lg) !important;
-  }
-}
 </style>

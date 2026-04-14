@@ -176,7 +176,7 @@ onMounted(async () => {
           />
           <div class="hero-overlay"></div>
         </div>
-        <div class="container hero-content text-center text-white">
+        <div class="container-fluid px-3 px-md-4 px-lg-5 hero-content text-center text-white">
           <h1
             v-entrance="{ y: 60, blur: 10 }"
             class="hero-title mb-4"
@@ -190,7 +190,7 @@ onMounted(async () => {
 
       <!-- Welcome Section -->
       <section class="welcome-section page-section-pad section-stack-over">
-        <div class="container py-lg-0">
+        <div class="container-fluid px-3 px-md-4 px-lg-5 py-lg-0">
           <div class="row align-items-center gx-lg-5">
             <div class="col-lg-6 mb-4 mb-lg-0">
               <div class="welcome-img-wrapper shadow-sm rounded-4 overflow-hidden">
@@ -221,7 +221,7 @@ onMounted(async () => {
           <div class="story-overlay"></div>
         </div>
         <div class="story-content position-relative">
-          <div class="container page-section-pad">
+          <div class="container-fluid px-3 px-md-4 px-lg-5 page-section-pad">
             <div class="row justify-content-center">
               <div class="col-lg-10">
                 <div class="story-card p-4 p-lg-5 text-center shadow-lg">

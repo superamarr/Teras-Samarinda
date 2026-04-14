@@ -237,6 +237,12 @@ const handleSectionWheel = (e) => {
   color: #000000;
 }
 
+@media (min-width: 992px) {
+  .section-title {
+    white-space: nowrap;
+  }
+}
+
 .section-title .text-italic {
   font-style: italic;
 }

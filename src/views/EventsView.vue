@@ -112,7 +112,7 @@ onMounted(() => {
         <div class="hero-overlay"></div>
       </div>
       <div
-        class="container h-100 d-flex flex-column justify-content-center align-items-center text-center"
+        class="container-fluid px-3 px-md-4 px-lg-5 h-100 d-flex flex-column justify-content-center align-items-center text-center"
       >
         <div class="hero-content position-relative">
           <h1
@@ -129,7 +129,7 @@ onMounted(() => {
 
     <!-- Events Grid Section -->
     <section class="events-content page-section-pad section-stack-over">
-      <div class="container py-lg-0">
+      <div class="container-fluid px-3 px-md-4 px-lg-5 py-lg-0">
         <!-- Loading State -->
         <div v-if="isLoading" class="text-center py-5">
           <div class="spinner-border text-primary" role="status"></div>

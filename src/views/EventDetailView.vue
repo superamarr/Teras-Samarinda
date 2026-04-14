@@ -79,7 +79,7 @@ onMounted(() => {
           <div class="hero-overlay"></div>
         </div>
         <div
-          class="container h-100 d-flex flex-column justify-content-center align-items-center text-center"
+          class="container-fluid px-3 px-md-4 px-lg-5 h-100 d-flex flex-column justify-content-center align-items-center text-center"
         >
           <div class="hero-content text-white position-relative">
             <div
@@ -128,7 +128,7 @@ onMounted(() => {
 
       <!-- Event Content Section -->
       <section class="event-content page-section-pad section-stack-over">
-        <div class="container py-lg-0">
+        <div class="container-fluid px-3 px-md-4 px-lg-5 py-lg-0">
           <div class="row justify-content-center">
             <div class="col-lg-10">
               <div class="row g-5">

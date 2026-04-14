@@ -139,12 +139,12 @@ onMounted(async () => {
   justify-content: space-between;
   column-gap: clamp(1.25rem, 4vw, 2.5rem);
   row-gap: clamp(1rem, 2.5vw, 1.5rem);
-  margin-bottom: var(--section-pad-y);
+  margin-bottom: 2rem;
 }
 
 @media (min-width: 992px) {
   .gallery-header {
-    margin-bottom: var(--section-pad-y-lg);
+    margin-bottom: 3rem;
   }
 }
 

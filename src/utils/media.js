@@ -3,27 +3,19 @@ export function resolveMediaUrl(path) {
   if (path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) return path
 
   // Detect and return static public images (e.g., from /images/ directory)
-  const publicMatch = path.match(/\/?images\/[^'"]+/);
+  const publicMatch = path.match(/\/?images\/[^'"]+/)
   if (publicMatch) {
     // Return relative to root, ensuring it starts with /
-    return publicMatch[0].startsWith('/') ? publicMatch[0] : `/${publicMatch[0]}`;
+    return publicMatch[0].startsWith('/') ? publicMatch[0] : `/${publicMatch[0]}`
   }
 
-  const raw = import.meta.env.VITE_API_BASE_URL
-  const devFallback = 'http://localhost/pa/Teras-Samarinda/backend/public'
-  const apiRoot =
-    raw != null && raw !== ''
-      ? raw.replace(/\/$/, '')
-      : import.meta.env.DEV
-        ? devFallback
-        : ''
+  // Hardcoded production URL - no runtime env dependency needed
+  const apiRoot = 'https://taufikramadhani.web.id/backend/public'
   let backendUploads = '/uploads'
   if (apiRoot !== '') {
-    // Same-origin proxy setup: API at /api, static uploads at /uploads.
     if (/\/api\/?$/.test(apiRoot)) {
       backendUploads = '/uploads'
     } else if (/\/public\/?$/.test(apiRoot)) {
-      // Laragon/local fallback usually points to .../backend/public
       backendUploads = `${apiRoot.replace(/\/$/, '')}/uploads`
     } else {
       backendUploads = `${apiRoot.replace(/\/$/, '')}/uploads`

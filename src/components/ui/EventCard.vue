@@ -90,12 +90,18 @@ defineProps({
   z-index: 2;
 
   /* Reinforced Glassmorphism */
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(12px) saturate(1.15);
-  -webkit-backdrop-filter: blur(12px) saturate(1.15);
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--color-glass-bg-fallback, rgba(7, 46, 54, 0.72));
+  backdrop-filter: blur(var(--glass-blur, 18px)) saturate(1.2);
+  -webkit-backdrop-filter: blur(var(--glass-blur, 18px)) saturate(1.2);
+  border-top: 1px solid var(--color-glass-border, rgba(255, 255, 255, 0.2));
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
+}
+
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .event-content {
+    background: var(--color-glass-bg, rgba(255, 255, 255, 0.24));
+  }
 }
 
 .event-date {

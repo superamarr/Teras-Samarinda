@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Deploy dari Linux/macOS/Git Bash: SSH → git pull → docker compose up --build
+# Deploy docker (Linux/macOS/Git Bash): SSH -> git pull -> docker compose up --build
 #
 #   chmod +x scripts/deploy-to-vps.sh
 #   cp scripts/deploy.env.example scripts/deploy.env   # isi variabel

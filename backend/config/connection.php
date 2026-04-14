@@ -77,7 +77,7 @@ class Database {
 
     private function __construct() {
         // Prioritas env:
-        // 1) DB_* (lokal/docker compose existing)
+        // 1) DB_* (lokal/VPS native)
         // 2) MYSQL* (Railway MySQL variables)
         $this->host = tera_env_first(['DB_HOST', 'MYSQLHOST'], 'localhost');
         $this->port = tera_env_first(['DB_PORT', 'MYSQLPORT'], '3306');

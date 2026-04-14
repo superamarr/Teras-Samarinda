@@ -1,17 +1,10 @@
-# TeraSamarinda — production-style stack (Nginx + PHP-FPM + MySQL)
-# Usage:
-#   cp .env.example .env
-#   docker compose build --build-arg VITE_API_BASE_URL=
-#   docker compose up -d
-# Impor database.sql ke MySQL setelah kontainer siap (lihat docker/README.md)
-
 services:
   nginx:
     build:
       context: .
       dockerfile: docker/nginx/Dockerfile
       args:
-        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api}
     ports:
       - "${HTTP_PORT:-80}:80"
     volumes:
@@ -27,7 +20,6 @@ services:
     env_file:
       - .env
     environment:
-      # Wajib di jaringan Docker; menimpa DB_HOST di .env (biasanya localhost untuk Laragon)
       DB_HOST: db
     volumes:
       - uploads_data:/var/www/backend/public/uploads

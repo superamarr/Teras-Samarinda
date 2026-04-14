@@ -4,9 +4,8 @@ This template should help get you started developing with Vue 3 in Vite.
 
 ## Deploy ke VPS (Docker)
 
-Panduan lengkap dari nol: **SSH ke VPS**, **unggah kode**, **jalankan Docker** — lihat **[docker/README.md](docker/README.md)**.
-
-**Update berulang dari lokal:** push ke Git lalu jalankan **`scripts/deploy-to-vps.ps1`** (Windows) atau **`scripts/deploy-to-vps.sh`** — lihat **Bagian 11** di [docker/README.md](docker/README.md).
+Panduan docker compose: **[docker/README.md](docker/README.md)**.
+Domain target saat ini: `taufikramadhani.web.id`.
 
 ## Recommended IDE Setup
 

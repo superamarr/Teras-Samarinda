@@ -1,5 +1,5 @@
 <#
-  Deploy dari PC Windows ke VPS: SSH → git pull → docker compose up --build
+  Deploy dari PC Windows ke VPS: SSH -> git pull -> docker compose up --build
 
   Persiapan:
     1. cp scripts/deploy.env.example scripts/deploy.env  (isi DEPLOY_*)

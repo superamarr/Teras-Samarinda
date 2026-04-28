@@ -1,13 +1,57 @@
 <?php
 require_once __DIR__ . '/../../config/connection.php';
+require_once __DIR__ . '/../Models/PageViewModel.php';
 require_once __DIR__ . '/../../helpers/Response.php';
 
 class AnalyticsController {
     private $db;
+    private $pageViewModel;
 
     public function __construct() {
         date_default_timezone_set('Asia/Makassar');
         $this->db = Database::getInstance();
+        $this->pageViewModel = new PageViewModel();
+    }
+
+    public function recordView() {
+        $input = json_decode(file_get_contents('php://input'), true);
+
+        $sessionId = $input['session_id'] ?? null;
+        $pageUrl = $input['page_url'] ?? null;
+        $referrer = $input['referrer'] ?? null;
+
+        if (!$sessionId || !$pageUrl) {
+            Response::error('session_id and page_url are required', 400);
+        }
+
+        try {
+            $this->pageViewModel->recordView($sessionId, $pageUrl, $referrer);
+            Response::success('Page view recorded', null, 201);
+        } catch (Exception $e) {
+            error_log("RecordView Error: " . $e->getMessage());
+            Response::json(['success' => false, 'message' => 'Failed to record page view'], 500);
+        }
+    }
+
+    public function updateDuration() {
+        $input = json_decode(file_get_contents('php://input'), true);
+
+        $sessionId = $input['session_id'] ?? null;
+        $pageUrl = $input['page_url'] ?? null;
+        $durationSeconds = (int)($input['duration_seconds'] ?? 0);
+        $isBounce = !empty($input['is_bounce']) ? (int)$input['is_bounce'] : ($durationSeconds < 10 ? 1 : 0);
+
+        if (!$sessionId || !$pageUrl) {
+            Response::error('session_id and page_url are required', 400);
+        }
+
+        try {
+            $this->pageViewModel->updateDuration($sessionId, $pageUrl, $durationSeconds, $isBounce);
+            Response::success('Duration updated');
+        } catch (Exception $e) {
+            error_log("UpdateDuration Error: " . $e->getMessage());
+            Response::json(['success' => false, 'message' => 'Failed to update duration'], 500);
+        }
     }
 
     public function getOverview() {

@@ -1,9 +1,11 @@
 <script setup>
 import StatCard from '@/components/admin/StatCard.vue'
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { analyticsService } from '@/api/analytics'
 
 const selectedPeriod = ref('year')
+const lastUpdated = ref('')
+let refreshTimer = null
 
 const currentKpi = ref({
   pageViews: '0',
@@ -18,11 +20,16 @@ const currentKpi = ref({
 
 const periodLabelText = computed(() => {
   switch (selectedPeriod.value) {
-    case 'week': return 'dari minggu lalu'
-    case 'month': return 'dari bulan lalu'
-    case 'year': return 'dari tahun lalu'
-    case 'all': return 'selama ini'
-    default: return 'dari bulan lalu'
+    case 'week':
+      return 'dari minggu lalu'
+    case 'month':
+      return 'dari bulan lalu'
+    case 'year':
+      return 'dari tahun lalu'
+    case 'all':
+      return 'selama ini'
+    default:
+      return 'dari bulan lalu'
   }
 })
 
@@ -195,6 +202,12 @@ const updateCharts = async (period) => {
     }
   } catch (err) {
     console.error('Failed to update charts', err)
+  } finally {
+    lastUpdated.value = new Date().toLocaleTimeString('id-ID', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    })
   }
 }
 
@@ -204,13 +217,28 @@ watch(selectedPeriod, (newVal) => {
 
 onMounted(() => {
   updateCharts(selectedPeriod.value)
+  refreshTimer = setInterval(() => {
+    updateCharts(selectedPeriod.value)
+  }, 60000)
+})
+
+onBeforeUnmount(() => {
+  if (refreshTimer) {
+    clearInterval(refreshTimer)
+    refreshTimer = null
+  }
 })
 </script>
 
 <template>
   <div class="analytics-view">
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2 class="fw-bold mb-0 dashboard-title">Laporan Analytics</h2>
+      <div>
+        <h2 class="fw-bold mb-1 dashboard-title">Laporan Analytics</h2>
+        <p v-if="lastUpdated" class="text-secondary small mb-0">
+          <i class="bi bi-arrow-repeat me-1"></i>Diperbarui: {{ lastUpdated }}
+        </p>
+      </div>
       <select v-model="selectedPeriod" class="chart-filter-select">
         <option value="all">Semua Waktu</option>
         <option value="year">Tahun Ini</option>
@@ -364,46 +392,56 @@ onMounted(() => {
     </div>
 
     <!-- Top Content Table -->
-        <div class="bg-white rounded-4 shadow-sm border overflow-hidden mt-2">
-          <div class="p-4 border-bottom bg-light d-flex align-items-center gap-3">
-            <div class="icon-box-small rounded-2 d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary">
-              <i class="bi bi-bar-chart-line-fill"></i>
-            </div>
-            <h5 class="mb-0 fw-bold">Konten Paling Banyak Dilihat (Top Konten)</h5>
-          </div>
-          <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-              <thead class="bg-light border-bottom">
-                <tr>
-                  <th class="px-4 py-3 text-secondary small fw-bold text-uppercase">Nama Konten</th>
-                  <th class="px-4 py-3 text-secondary small fw-bold text-uppercase">Jenis</th>
-                  <th class="px-4 py-3 text-secondary small fw-bold text-uppercase text-center">Views</th>
-                  <th class="px-4 py-3 text-secondary small fw-bold text-uppercase text-center">Avg Time</th>
-                  <th class="px-4 py-3 text-secondary small fw-bold text-uppercase text-end">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(item, index) in topContentData" :key="index" class="border-bottom">
-                  <td class="px-4 py-3 fw-bold text-dark">{{ item.name }}</td>
-                  <td class="px-4 py-3">
-                    <span class="badge px-3 py-2 rounded-bill bg-light text-dark border fw-normal">
-                      <i class="bi bi-tag me-1 text-primary"></i>
-                      {{ item.type }}
-                    </span>
-                  </td>
-                  <td class="px-4 py-3 text-center fw-semibold">{{ item.views.toLocaleString('id-ID') }}</td>
-                  <td class="px-4 py-3 text-center text-secondary font-monospace">{{ item.avgTime }}</td>
-                  <td class="px-4 py-3 text-end">
-                    <span class="badge px-3 py-2 rounded-bill bg-success-subtle text-success">
-                      <i class="bi bi-check-circle me-1"></i>
-                      {{ item.status }}
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+    <div class="bg-white rounded-4 shadow-sm border overflow-hidden mt-2">
+      <div class="p-4 border-bottom bg-light d-flex align-items-center gap-3">
+        <div
+          class="icon-box-small rounded-2 d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary"
+        >
+          <i class="bi bi-bar-chart-line-fill"></i>
         </div>
+        <h5 class="mb-0 fw-bold">Konten Paling Banyak Dilihat (Top Konten)</h5>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="bg-light border-bottom">
+            <tr>
+              <th class="px-4 py-3 text-secondary small fw-bold text-uppercase">Nama Konten</th>
+              <th class="px-4 py-3 text-secondary small fw-bold text-uppercase">Jenis</th>
+              <th class="px-4 py-3 text-secondary small fw-bold text-uppercase text-center">
+                Views
+              </th>
+              <th class="px-4 py-3 text-secondary small fw-bold text-uppercase text-center">
+                Avg Time
+              </th>
+              <th class="px-4 py-3 text-secondary small fw-bold text-uppercase text-end">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(item, index) in topContentData" :key="index" class="border-bottom">
+              <td class="px-4 py-3 fw-bold text-dark">{{ item.name }}</td>
+              <td class="px-4 py-3">
+                <span class="badge px-3 py-2 rounded-bill bg-light text-dark border fw-normal">
+                  <i class="bi bi-tag me-1 text-primary"></i>
+                  {{ item.type }}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-center fw-semibold">
+                {{ item.views.toLocaleString('id-ID') }}
+              </td>
+              <td class="px-4 py-3 text-center text-secondary font-monospace">
+                {{ item.avgTime }}
+              </td>
+              <td class="px-4 py-3 text-end">
+                <span class="badge px-3 py-2 rounded-bill bg-success-subtle text-success">
+                  <i class="bi bi-check-circle me-1"></i>
+                  {{ item.status }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </template>
 

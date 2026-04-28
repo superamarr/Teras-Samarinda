@@ -14,8 +14,35 @@ dist-ssr
 coverage
 *.local
 
-# Deploy lokal → VPS (berisi IP / path — jangan di-commit)
-scripts/deploy.env
+# Environment files (berisi kredensial sensitif)
+.env
+.env.production
+deploy_config.bat
+deploy_config.sh
+
+# Backup deployment (berisi konfigurasi sensitif)
+backups/deployment/*.bat
+backups/deployment/*.sh
+backups/deployment/.env_*
+
+# Docker (not used — deploy via InfinityFree)
+docker/
+docker-compose.yml
+.dockerignore
+
+# Deployment scripts (not used — deploy via InfinityFree)
+scripts/
+deploy.bat
+deploy.sh
+deploy_config.example.bat
+deploy_config.example.sh
+
+# Internal docs (not needed in repo)
+docs/
+DEPLOYMENT_GUIDE.md
+
+# Debug/utility scripts (security risk if publicly accessible)
+backend/public/reset-password.php
 
 # Editor directories and files
 .vscode/*

@@ -6,8 +6,10 @@ import Navbar from '@/components/Navbar.vue'
 import Footer from '@/components/Footer.vue'
 import { galleryService } from '@/api/gallery'
 import { resolveMediaUrl } from '@/utils/media'
+import { usePageTracking } from '@/composables/usePageTracking'
 
 gsap.registerPlugin(ScrollTrigger)
+usePageTracking()
 
 const galleryItems = ref([])
 const isLoading = ref(true)

@@ -1,6 +1,6 @@
 <script setup>
 import StatCard from '@/components/admin/StatCard.vue'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { activityService } from '@/api/activities'
 import { eventService } from '@/api/events'
 import { facilityService } from '@/api/facilities'
@@ -32,6 +32,8 @@ const recentActivities = ref([])
 const activityListRef = ref(null)
 const currentIndex = ref(0)
 const isScrolling = ref(false)
+const lastUpdated = ref('')
+let refreshTimer = null
 
 const formatTimeAgo = (dateString) => {
   const now = new Date()
@@ -107,6 +109,7 @@ const loadStats = async () => {
     console.error('Failed to load stats:', error)
   } finally {
     isLoading.value = false
+    lastUpdated.value = formatLastUpdated()
   }
 }
 const pageViewsSeries = ref([{ name: 'Page Views', data: [] }])
@@ -242,8 +245,23 @@ const handleWheel = (event) => {
   }
 }
 
+const formatLastUpdated = () => {
+  const now = new Date()
+  return now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+}
+
 onMounted(() => {
   loadStats()
+  refreshTimer = setInterval(() => {
+    loadStats()
+  }, 60000)
+})
+
+onBeforeUnmount(() => {
+  if (refreshTimer) {
+    clearInterval(refreshTimer)
+    refreshTimer = null
+  }
 })
 </script>
 
@@ -252,6 +270,9 @@ onMounted(() => {
     <h2 class="fw-bold mb-3 mb-md-4 dashboard-title fs-3 fs-md-2">
       Selamat {{ greeting }}, Admin!
     </h2>
+    <p v-if="lastUpdated" class="text-secondary small mb-0">
+      <i class="bi bi-arrow-repeat me-1"></i>Diperbarui: {{ lastUpdated }}
+    </p>
 
     <!-- Stats Grid -->
     <div v-if="isLoading" class="text-center py-5">

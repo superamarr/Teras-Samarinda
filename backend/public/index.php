@@ -113,6 +113,23 @@ try {
             
             if ($method === 'GET') {
                 $ctrl->getOverview();
+            } elseif ($method === 'POST') {
+                $ctrl->recordView();
+            } elseif ($method === 'PUT' || $method === 'PATCH') {
+                $ctrl->updateDuration();
+            }
+            break;
+            
+        case 'page-views':
+            require_once __DIR__ . '/../app/Controllers/AnalyticsController.php';
+            $ctrl = new AnalyticsController();
+            
+            if ($method === 'POST') {
+                $ctrl->recordView();
+            } elseif ($method === 'PUT' || $method === 'PATCH') {
+                $ctrl->updateDuration();
+            } else {
+                Response::error('Method not allowed', 405);
             }
             break;
             

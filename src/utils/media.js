@@ -9,8 +9,7 @@ export function resolveMediaUrl(path) {
     return publicMatch[0].startsWith('/') ? publicMatch[0] : `/${publicMatch[0]}`
   }
 
-  // Hardcoded production URL - no runtime env dependency needed
-  const apiRoot = 'https://taufikramadhani.web.id/backend/public'
+  const apiRoot = import.meta.env.VITE_API_BASE_URL || 'http://localPA.test/Teras-Samarinda/backend/public'
   let backendUploads = '/uploads'
   if (apiRoot !== '') {
     if (/\/api\/?$/.test(apiRoot)) {

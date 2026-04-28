@@ -6,6 +6,10 @@ import Navbar from '@/components/Navbar.vue'
 import Footer from '@/components/Footer.vue'
 import { aboutService } from '@/api/about'
 import { resolveMediaUrl } from '@/utils/media'
+import { usePageTracking } from '@/composables/usePageTracking'
+
+gsap.registerPlugin(ScrollTrigger)
+usePageTracking()
 
 // Fallback images in case no dynamic image is set
 import defaultHeroImg from '@/assets/images/generation_8510.jfif'

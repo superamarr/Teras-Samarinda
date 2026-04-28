@@ -8,7 +8,7 @@ const { success, error: showError, toast } = useSwal()
 
 const settings = ref({
   website_title: '',
-  maintenance_mode: 0
+  maintenance_mode: 0,
 })
 
 const isLoading = ref(true)
@@ -22,7 +22,7 @@ const loadSettings = async () => {
     if (res.data.success && res.data.data) {
       settings.value = {
         website_title: res.data.data.website_title,
-        maintenance_mode: res.data.data.maintenance_mode
+        maintenance_mode: res.data.data.maintenance_mode,
       }
     }
   } catch (error) {
@@ -32,20 +32,7 @@ const loadSettings = async () => {
   }
 }
 
-const saveSettings = async (event) => {
-  const form = formRef.value
-  if (form && !form.checkValidity()) {
-    if (event) {
-      event.preventDefault()
-      event.stopPropagation()
-    }
-    wasValidated.value = true
-    return
-  }
-
-  const result = await useSwal().confirm('Simpan Peraturan', 'Apakah Anda yakin ingin menyimpan perubahan konfigurasi website ini?')
-  if (!result.isConfirmed) return
-  
+const doSaveSettings = async () => {
   isSaving.value = true
   try {
     const res = await systemService.updateSettings(settings.value)
@@ -60,9 +47,41 @@ const saveSettings = async (event) => {
   }
 }
 
+const saveSettings = async (event) => {
+  const form = formRef.value
+  if (form && !form.checkValidity()) {
+    if (event) {
+      event.preventDefault()
+      event.stopPropagation()
+    }
+    wasValidated.value = true
+    return
+  }
+
+  const result = await useSwal().confirm(
+    'Simpan Peraturan',
+    'Apakah Anda yakin ingin menyimpan perubahan konfigurasi website ini?',
+  )
+  if (!result.isConfirmed) return
+
+  await doSaveSettings()
+}
+
 const toggleMaintenance = async () => {
-  settings.value.maintenance_mode = settings.value.maintenance_mode === 1 ? 0 : 1
-  await saveSettings()
+  const newValue = settings.value.maintenance_mode === 1 ? 0 : 1
+  const isEnabling = newValue === 1
+
+  const result = await useSwal().confirm(
+    isEnabling ? 'Aktifkan Maintenance Mode?' : 'Nonaktifkan Maintenance Mode?',
+    isEnabling
+      ? 'Jika diaktifkan, pengunjung tidak dapat mengakses website. Anda yakin?'
+      : 'Website akan kembali bisa diakses pengunjung. Anda yakin?',
+  )
+
+  if (!result.isConfirmed) return
+
+  settings.value.maintenance_mode = newValue
+  await doSaveSettings()
 }
 
 onMounted(() => {
@@ -82,22 +101,28 @@ onMounted(() => {
     </div>
 
     <div v-else class="row g-4 max-w-800">
-      
       <!-- General Settings -->
       <div class="col-12">
         <div class="card border-0 bg-white shadow-sm rounded-4 p-4 h-100">
           <h5 class="fw-bold mb-4 d-flex align-items-center text-dark">
             <i class="bi bi-globe me-2 text-primary"></i> Identitas Website
           </h5>
-          
-          <form ref="formRef" @submit.prevent="saveSettings" :class="{'was-validated': wasValidated}" novalidate>
+
+          <form
+            ref="formRef"
+            @submit.prevent="saveSettings"
+            :class="{ 'was-validated': wasValidated }"
+            novalidate
+          >
             <div class="mb-4">
-              <label class="form-label fw-medium text-secondary">Judul Website (Browser Title) *</label>
-              <input 
-                v-model="settings.website_title" 
-                type="text" 
-                class="form-control border-2 py-2 px-3 focus-ring" 
-                placeholder="Contoh: TeraSamarinda" 
+              <label class="form-label fw-medium text-secondary"
+                >Judul Website (Browser Title) *</label
+              >
+              <input
+                v-model="settings.website_title"
+                type="text"
+                class="form-control border-2 py-2 px-3 focus-ring"
+                placeholder="Contoh: TeraSamarinda"
                 required
               />
               <div class="invalid-feedback">Judul website tidak boleh kosong.</div>
@@ -111,41 +136,52 @@ onMounted(() => {
 
       <!-- Maintenance Mode -->
       <div class="col-12">
-        <div class="card border-0 shadow-sm rounded-4 p-4 h-100" :class="settings.maintenance_mode === 1 ? 'bg-danger-subtle' : 'bg-white'">
+        <div
+          class="card border-0 shadow-sm rounded-4 p-4 h-100"
+          :class="settings.maintenance_mode === 1 ? 'bg-danger-subtle' : 'bg-white'"
+        >
           <div class="d-flex justify-content-between align-items-start mb-3">
             <div>
-              <h5 class="fw-bold d-flex align-items-center mb-2" :class="settings.maintenance_mode === 1 ? 'text-danger' : 'text-dark'">
+              <h5
+                class="fw-bold d-flex align-items-center mb-2"
+                :class="settings.maintenance_mode === 1 ? 'text-danger' : 'text-dark'"
+              >
                 <i class="bi bi-tools me-2"></i> Mode Pemeliharaan (Maintenance)
               </h5>
-              <p class="mb-0 text-secondary" style="max-width: 500px;">
-                Jika mode ini diaktifkan, pengunjung reguler akan dialihkan ke halaman pemberitahuan perbaikan.
-                Kamu (Admin) tetap bisa login dan mengakses dashboard.
+              <p class="mb-0 text-secondary" style="max-width: 500px">
+                Jika mode ini diaktifkan, pengunjung reguler akan dialihkan ke halaman pemberitahuan
+                perbaikan. Kamu (Admin) tetap bisa login dan mengakses dashboard.
               </p>
             </div>
-            
+
             <div class="form-check form-switch custom-switch flex-shrink-0 ms-3 mt-1">
-              <input 
-                class="form-check-input mt-0 cursor-pointer" 
-                type="checkbox" 
-                role="switch" 
+              <input
+                class="form-check-input mt-0 cursor-pointer"
+                type="checkbox"
+                role="switch"
                 id="maintenanceToggle"
                 :checked="settings.maintenance_mode === 1"
                 @change="toggleMaintenance"
-              >
+              />
             </div>
           </div>
-          
-          <div v-if="settings.maintenance_mode === 1" class="alert alert-danger mb-0 mt-3 border-0 rounded-3 d-flex align-items-center">
+
+          <div
+            v-if="settings.maintenance_mode === 1"
+            class="alert alert-danger mb-0 mt-3 border-0 rounded-3 d-flex align-items-center"
+          >
             <i class="bi bi-exclamation-triangle-fill me-3 fs-4"></i>
             <div>
-              <strong>Perhatian!</strong> Website saat ini <u>tidak bisa diakses publik</u>. Semua trafiks pengunjung dialihkan.
+              <strong>Perhatian!</strong> Website saat ini <u>tidak bisa diakses publik</u>. Semua
+              trafiks pengunjung dialihkan.
             </div>
           </div>
-          <div v-else class="alert alert-success mb-0 mt-3 border-0 rounded-3 bg-success-subtle text-success d-flex align-items-center">
+          <div
+            v-else
+            class="alert alert-success mb-0 mt-3 border-0 rounded-3 bg-success-subtle text-success d-flex align-items-center"
+          >
             <i class="bi bi-check-circle-fill me-3 fs-4"></i>
-            <div>
-              Website terpantau langsung. Mode pemeliharaan sedang dimatikan.
-            </div>
+            <div>Website terpantau langsung. Mode pemeliharaan sedang dimatikan.</div>
           </div>
         </div>
       </div>
@@ -161,7 +197,6 @@ onMounted(() => {
           Simpan Perubahan
         </button>
       </div>
-
     </div>
   </AdminContentWrapper>
 </template>

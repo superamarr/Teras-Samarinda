@@ -8,6 +8,9 @@ import GallerySection from '@/components/landing/GallerySection.vue'
 import EventsSection from '@/components/landing/EventsSection.vue'
 import ContactSection from '@/components/landing/ContactSection.vue'
 import Footer from '@/components/Footer.vue'
+import { usePageTracking } from '@/composables/usePageTracking'
+
+usePageTracking()
 </script>
 
 <template>

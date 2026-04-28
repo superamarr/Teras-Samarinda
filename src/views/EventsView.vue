@@ -7,8 +7,10 @@ import Footer from '@/components/Footer.vue'
 import EventCard from '@/components/ui/EventCard.vue'
 import { eventService } from '@/api/events'
 import { resolveMediaUrl } from '@/utils/media'
+import { usePageTracking } from '@/composables/usePageTracking'
 
 gsap.registerPlugin(ScrollTrigger)
+usePageTracking()
 
 const events = ref([])
 const isLoading = ref(true)

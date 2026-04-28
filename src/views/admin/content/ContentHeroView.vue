@@ -132,7 +132,7 @@ const handleImageDrop = (event) => {
   }
 }
 
-const processImage = (file) => {
+const processImage = async (file) => {
   const sizeMB = file.size / (1024 * 1024)
   const allowed = ['image/webp', 'image/jpeg', 'image/jpg', 'image/png']
 
@@ -147,10 +147,10 @@ const processImage = (file) => {
   }
 
   if (sizeMB > 1) {
-    const confirmWebp = confirm(
+    const confirmWebp = await confirm(
       'File lebih dari 1MB. Disarankan menggunakan format WebP untuk performa lebih baik. Lanjutkan dengan format saat ini?',
     )
-    if (!confirmWebp) return
+    if (!confirmWebp.isConfirmed) return
   }
 
   selectedImage.value = file

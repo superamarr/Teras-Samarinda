@@ -29,6 +29,7 @@ backups/deployment/.env_*
 docker/
 docker-compose.yml
 .dockerignore
+.env.docker.example
 
 # Deployment scripts (not used — deploy via InfinityFree)
 scripts/

@@ -63,25 +63,25 @@ Komunikasi antara frontend dan backend dilakukan sepenuhnya melalui **RESTful AP
 | 5 | **Detail Event** | Halaman detail satu event dengan informasi lengkap: deskripsi, gambar, tanggal & waktu, lokasi, dan kontak penyelenggara. | <img width="1896" height="870" alt="image" src="https://github.com/user-attachments/assets/fe499a9c-f2f7-47d1-b39b-d77e5c2356a0" /> |
 | 6 | **Halaman About** | Halaman "Tentang Kami" dengan informasi detail tentang Teras Samarinda: sejarah, visi misi, dan gambar-gambar terkait. | <img width="1896" height="860" alt="image" src="https://github.com/user-attachments/assets/3d7b41b1-0d2b-447e-9fb1-1f2fab43ba52" /> |
 | 7 | **Informasi Kontak** | Section kontak di landing page dengan alamat, telepon, email, dan embedded Google Maps untuk lokasi. | <img width="1896" height="766" alt="image" src="https://github.com/user-attachments/assets/2be52448-b5c7-4ab0-a83f-c127402fbbdb" /> |
-| 8 | **Mode Maintenance** | Halaman pengganti yang ditampilkan ketika Superadmin mengaktifkan mode maintenance. Pengunjung tidak dapat mengakses konten apapun. | <img width="1902" height="859" alt="image" src="https://github.com/user-attachments/assets/630e32a8-dcb4-44ba-bd65-abb7f29ae9d8" /> |
+| 8 | **Mode Maintenance** | Halaman pengganti yang ditampilkan ketika Superadmin mengaktifkan mode maintenance. Pengunjung tidak dapat mengakses konten apapun. | <img width="1913" height="859" alt="image" src="https://github.com/user-attachments/assets/3228bd27-ca74-4ea2-b9b4-875489df562a" /> |
 
 ### Dashboard Admin
 
 | No | Fitur | Deskripsi | Screenshot |
 |----|-------|-----------|------------|
-| 9 | **Login Admin** | Halaman login dengan form username dan password. Hanya admin yang dapat mengakses dashboard. Password di-hash dengan bcrypt. | ![Login](./screenshots/login-page.png) |
-| 10 | **Dashboard** | Ringkasan statistik (total pengguna, booking, event aktif) dalam kartu angka. Grafik tren analitik. Auto-refresh setiap 60 detik. | ![Dashboard](./screenshots/dashboard.png) |
-| 11 | **Analitik & Page Views** | Data kunjungan halaman detail: grafik tren harian/mingguan, halaman paling populer, durasi rata-rata kunjungan, dan sumber referral. Tracking real-time menggunakan sendBeacon API. | ![Analytics](./screenshots/analytics.png) |
-| 12 | **Manajemen Hero** | Kelola hero section: ubah background (gambar/video), teks judul, dan sub-judul. Upload gambar dengan konversi otomatis ke WebP. | ![Hero Management](./screenshots/hero-management.png) |
-| 13 | **Manajemen About** | Kelola konten halaman About: deskripsi, gambar-gambar, dan informasi lainnya. | ![About Management](./screenshots/about-management.png) |
-| 14 | **Manajemen Galeri** | Tambah, edit, hapus foto galeri. Atur keterangan dan urutan tampilan. | ![Gallery Management](./screenshots/gallery-management.png) |
-| 15 | **Manajemen Kontak** | Kelola informasi kontak: alamat, nomor telepon, email, dan link Google Maps. | ![Contact Management](./screenshots/contact-management.png) |
-| 16 | **Manajemen Kegiatan** | CRUD kegiatan/aktivitas Teras Samarinda. Daftar dalam format tabel, form detail untuk tambah/edit dengan upload gambar. | ![Activities Management](./screenshots/activities-management.png) |
-| 17 | **Manajemen Event** | CRUD event/acara. Daftar dalam format tabel, form detail untuk tambah/edit dengan input tanggal, lokasi, dan upload gambar. | ![Events Management](./screenshots/events-management.png) |
-| 18 | **Manajemen Fasilitas** | CRUD fasilitas yang tersedia. Daftar dalam format tabel, form detail untuk tambah/edit dengan upload gambar. | ![Facilities Management](./screenshots/facilities-management.png) |
-| 19 | **Manajemen Booking** | Daftar reservasi/booking dalam format tabel. Admin dapat melihat detail dan mengubah status (pending → confirmed → completed). | ![Booking Management](./screenshots/booking-management.png) |
-| 20 | **Pengaturan Sistem** | Konfigurasi sistem termasuk toggle maintenance mode. Konfirmasi SweetAlert2 sebelum perubahan diterapkan. | ![System Settings](./screenshots/system-settings.png) |
-| 21 | **Manajemen Pengguna** | CRUD akun admin. Tambah, edit (username, role, password), dan hapus user. Password di-hash bcrypt sebelum disimpan. | ![User Management](./screenshots/user-management.png) |
+| 9 | **Login Admin** | Halaman login dengan form username dan password. Hanya admin yang dapat mengakses dashboard. Password di-hash dengan bcrypt. | <img width="1919" height="875" alt="image" src="https://github.com/user-attachments/assets/5861ad24-cb0d-4968-9763-8e1f19682b88" /> |
+| 10 | **Dashboard** | Ringkasan statistik (total pengguna, booking, event aktif) dalam kartu angka. Grafik tren analitik. Auto-refresh setiap 60 detik. | <img width="1919" height="863" alt="image" src="https://github.com/user-attachments/assets/e95a1b27-1c5a-4a7a-a683-70ecd98d14ea" /> |
+| 11 | **Analitik & Page Views** | Data kunjungan halaman detail: grafik tren harian/mingguan, halaman paling populer, durasi rata-rata kunjungan, dan sumber referral. Tracking real-time menggunakan sendBeacon API. | <img width="1919" height="864" alt="image" src="https://github.com/user-attachments/assets/e4824493-2340-4837-b906-94fec3ad833a" /> |
+| 12 | **Manajemen Hero** | Kelola hero section: ubah background (gambar/video), teks judul, dan sub-judul. Upload gambar dengan konversi otomatis ke WebP. | <img width="1919" height="869" alt="image" src="https://github.com/user-attachments/assets/f78f7d54-55c0-4596-9e93-24a17885cdf6" /> |
+| 13 | **Manajemen About** | Kelola konten halaman About: deskripsi, gambar-gambar, dan informasi lainnya. | <img width="1896" height="870" alt="image" src="https://github.com/user-attachments/assets/aa64d881-b884-42d7-a124-1fb458656c5e" /> |
+| 14 | **Manajemen Galeri** | Tambah, edit, hapus foto galeri. Atur keterangan dan urutan tampilan. | <img width="1900" height="855" alt="image" src="https://github.com/user-attachments/assets/fcca0162-f087-49fd-b6aa-27cd089ba449" /> |
+| 15 | **Manajemen Kontak** | Kelola informasi kontak: alamat, nomor telepon, email, dan link Google Maps. | <img width="1898" height="865" alt="image" src="https://github.com/user-attachments/assets/f5ebe931-eae5-4bc6-8bf3-5c350d5bc193" /> |
+| 16 | **Manajemen Kegiatan** | CRUD kegiatan/aktivitas Teras Samarinda. Daftar dalam format tabel, form detail untuk tambah/edit dengan upload gambar. | <img width="1899" height="792" alt="image" src="https://github.com/user-attachments/assets/e38e222e-60e2-4ee3-910d-b7bcf8754ade" /> |
+| 17 | **Manajemen Event** | CRUD event/acara. Daftar dalam format tabel, form detail untuk tambah/edit dengan input tanggal, lokasi, dan upload gambar. | <img width="1894" height="830" alt="image" src="https://github.com/user-attachments/assets/3d609aa9-5531-42a0-9146-1c20b5115713" /> |
+| 18 | **Manajemen Fasilitas** | CRUD fasilitas yang tersedia. Daftar dalam format tabel, form detail untuk tambah/edit dengan upload gambar. | <img width="1893" height="835" alt="image" src="https://github.com/user-attachments/assets/73f27012-a2f5-440e-bef6-be2315a4b7f1" /> |
+| 19 | **Manajemen Booking** | Daftar reservasi/booking dalam format tabel. Admin dapat melihat detail dan mengubah status (pending → confirmed → completed). | <img width="1897" height="865" alt="image" src="https://github.com/user-attachments/assets/05f58677-e766-4847-bacc-ed5e24b28add" /> |
+| 20 | **Pengaturan Sistem** | Konfigurasi sistem termasuk toggle maintenance mode. Konfirmasi SweetAlert2 sebelum perubahan diterapkan. | <img width="1891" height="786" alt="image" src="https://github.com/user-attachments/assets/22b11201-e948-483a-9b6d-487db63f4499" /> |
+| 21 | **Manajemen Pengguna** | CRUD akun admin. Tambah, edit (username, role, password), dan hapus user. Password di-hash bcrypt sebelum disimpan. | <img width="1903" height="741" alt="image" src="https://github.com/user-attachments/assets/01c5e9bf-6ee2-4ac8-aaed-80bc87ef1526" /> |
 
 ---
 

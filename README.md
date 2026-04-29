@@ -56,14 +56,14 @@ Komunikasi antara frontend dan backend dilakukan sepenuhnya melalui **RESTful AP
 
 | No | Fitur | Deskripsi | Screenshot |
 |----|-------|-----------|------------|
-| 1 | **Landing Page (Home)** | Halaman utama yang menyusun seluruh section dari atas ke bawah: Hero section dengan background video, About, Fasilitas, Kegiatan, Event, Galeri, dan Kontak. Animasi scroll reveal untuk setiap section. | ![Landing Page](./screenshots/landing-page.png) |
-| 2 | **Hero Section** | Background video/gambar dengan teks judul dan sub-judul yang dinamis. Konten dapat diubah oleh admin melalui dashboard. | ![Hero Section](./screenshots/hero-section.png) |
-| 3 | **Halaman Galeri** | Galeri foto terpisah dengan grid layout responsif. Dilengkapi carousel Embla untuk tampilan slideshow dan lightbox untuk melihat foto ukuran penuh. | ![Galeri](./screenshots/gallery-page.png) |
-| 4 | **Halaman Event** | Daftar seluruh event/acara yang tersedia dalam format kartu. Menampilkan gambar, judul, tanggal, dan lokasi. Klik kartu untuk detail lengkap. | ![Events](./screenshots/events-page.png) |
-| 5 | **Detail Event** | Halaman detail satu event dengan informasi lengkap: deskripsi, gambar, tanggal & waktu, lokasi, dan kontak penyelenggara. | ![Detail Event](./screenshots/event-detail.png) |
-| 6 | **Halaman About** | Halaman "Tentang Kami" dengan informasi detail tentang Teras Samarinda: sejarah, visi misi, dan gambar-gambar terkait. | ![About](./screenshots/about-page.png) |
-| 7 | **Informasi Kontak** | Section kontak di landing page dengan alamat, telepon, email, dan embedded Google Maps untuk lokasi. | ![Kontak](./screenshots/contact-section.png) |
-| 8 | **Mode Maintenance** | Halaman pengganti yang ditampilkan ketika admin mengaktifkan mode maintenance. Pengunjung tidak dapat mengakses konten apapun. | ![Maintenance](./screenshots/maintenance-page.png) |
+| 1 | **Landing Page (Home)** | Halaman utama yang menyusun seluruh section dari atas ke bawah: Hero section dengan background video, About, Fasilitas, Kegiatan, Event, Galeri, dan Kontak. Animasi scroll reveal untuk setiap section. | <img width="1895" height="855" alt="image" src="https://github.com/user-attachments/assets/97154f86-5cc0-403d-8c5b-7414367808b7" /> |
+| 2 | **Hero Section** | Background video/gambar dengan teks judul dan sub-judul yang dinamis. Konten dapat diubah oleh admin melalui dashboard. | <img width="1897" height="858" alt="image" src="https://github.com/user-attachments/assets/eda665c9-08d9-4aa0-8e05-fe7a6a26d11f" /> |
+| 3 | **Halaman Galeri** | Galeri foto terpisah dengan grid layout responsif. Dilengkapi carousel Embla untuk tampilan slideshow dan lightbox untuk melihat foto ukuran penuh. | <img width="1889" height="848" alt="image" src="https://github.com/user-attachments/assets/1e41e495-d548-4e7f-ad7f-6d2d4223bae4" /> |
+| 4 | **Halaman Event** | Daftar seluruh event/acara yang tersedia dalam format kartu. Menampilkan gambar, judul, tanggal, dan lokasi. Klik kartu untuk detail lengkap. | <img width="1895" height="855" alt="image" src="https://github.com/user-attachments/assets/131edd56-3fff-4cd1-aad0-acb9b89a420e" /> |
+| 5 | **Detail Event** | Halaman detail satu event dengan informasi lengkap: deskripsi, gambar, tanggal & waktu, lokasi, dan kontak penyelenggara. | <img width="1896" height="870" alt="image" src="https://github.com/user-attachments/assets/fe499a9c-f2f7-47d1-b39b-d77e5c2356a0" /> |
+| 6 | **Halaman About** | Halaman "Tentang Kami" dengan informasi detail tentang Teras Samarinda: sejarah, visi misi, dan gambar-gambar terkait. | <img width="1896" height="860" alt="image" src="https://github.com/user-attachments/assets/3d7b41b1-0d2b-447e-9fb1-1f2fab43ba52" /> |
+| 7 | **Informasi Kontak** | Section kontak di landing page dengan alamat, telepon, email, dan embedded Google Maps untuk lokasi. | <img width="1896" height="766" alt="image" src="https://github.com/user-attachments/assets/2be52448-b5c7-4ab0-a83f-c127402fbbdb" /> |
+| 8 | **Mode Maintenance** | Halaman pengganti yang ditampilkan ketika Superadmin mengaktifkan mode maintenance. Pengunjung tidak dapat mengakses konten apapun. | <img width="1902" height="859" alt="image" src="https://github.com/user-attachments/assets/630e32a8-dcb4-44ba-bd65-abb7f29ae9d8" /> |
 
 ### Dashboard Admin
 

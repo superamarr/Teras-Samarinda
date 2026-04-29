@@ -165,57 +165,6 @@ TeraSamarinda/
 
 ---
 
-## API Endpoints
-
-| Method | Endpoint | Deskripsi | Auth |
-|--------|----------|-----------|------|
-| POST | `/auth/login` | Login admin | ❌ |
-| POST | `/auth/logout` | Logout admin | ✅ |
-| GET | `/auth/check` | Cek session aktif | ✅ |
-| GET | `/hero` | Ambil data hero | ❌ |
-| PUT | `/hero` | Update hero | ✅ |
-| GET | `/about` | Ambil data about | ❌ |
-| PUT | `/about` | Update about | ✅ |
-| GET | `/gallery` | Daftar galeri | ❌ |
-| POST | `/gallery` | Tambah galeri | ✅ |
-| PUT | `/gallery/{id}` | Edit galeri | ✅ |
-| DELETE | `/gallery/{id}` | Hapus galeri | ✅ |
-| GET | `/events` | Daftar event | ❌ |
-| GET | `/events/{id}` | Detail event | ❌ |
-| POST | `/events` | Tambah event | ✅ |
-| PUT | `/events/{id}` | Edit event | ✅ |
-| DELETE | `/events/{id}` | Hapus event | ✅ |
-| GET | `/activities` | Daftar kegiatan | ❌ |
-| GET | `/activities/{id}` | Detail kegiatan | ❌ |
-| POST | `/activities` | Tambah kegiatan | ✅ |
-| PUT | `/activities/{id}` | Edit kegiatan | ✅ |
-| DELETE | `/activities/{id}` | Hapus kegiatan | ✅ |
-| GET | `/facilities` | Daftar fasilitas | ❌ |
-| GET | `/facilities/{id}` | Detail fasilitas | ❌ |
-| POST | `/facilities` | Tambah fasilitas | ✅ |
-| PUT | `/facilities/{id}` | Edit fasilitas | ✅ |
-| DELETE | `/facilities/{id}` | Hapus fasilitas | ✅ |
-| GET | `/bookings` | Daftar booking | ✅ |
-| POST | `/bookings` | Tambah booking | ❌ |
-| PUT | `/bookings/{id}` | Ubah status booking | ✅ |
-| DELETE | `/bookings/{id}` | Hapus booking | ✅ |
-| GET | `/contact` | Ambil data kontak | ❌ |
-| PUT | `/contact` | Update kontak | ✅ |
-| GET | `/analytics` | Data analitik | ✅ |
-| POST | `/analytics` | Data analitik (filtered) | ✅ |
-| POST | `/page-views` | Rekam kunjungan halaman | ❌ |
-| PUT | `/page-views` | Update durasi kunjungan | ❌ |
-| GET | `/stats` | Statistik ringkasan | ✅ |
-| GET | `/system` | Pengaturan sistem | ✅ |
-| PUT | `/system` | Update pengaturan | ✅ |
-| GET | `/users` | Daftar pengguna | ✅ |
-| POST | `/users` | Tambah pengguna | ✅ |
-| PUT | `/users/{id}` | Edit pengguna | ✅ |
-| DELETE | `/users/{id}` | Hapus pengguna | ✅ |
-| GET | `/activity-logs` | Log aktivitas | ✅ |
-
----
-
 ## Lisensi
 
 Project ini dikembangkan untuk kebutuhan Teras Samarinda. Hak cipta dilindungi.

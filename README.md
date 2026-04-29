@@ -147,8 +147,6 @@ TeraSamarinda/
 └── README.md                     # File ini
 ```
 
-> Untuk penjelasan detail setiap folder dan file, lihat [DOKUMENTASI.md](./DOKUMENTASI.md).
-
 ---
 
 ## Keamanan
